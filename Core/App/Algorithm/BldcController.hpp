@@ -25,6 +25,7 @@ class BldcController {
     void update() {
         _angleProcessor->update();
         _currentProcessor->update(_angleProcessor->getElectricalAngle());
+        //_modulationProcessor->setVoltage(1, 0, _angleProcessor->getElectricalAngle());
     }
 
    private:
