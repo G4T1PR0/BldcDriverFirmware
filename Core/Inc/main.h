@@ -57,6 +57,32 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define W_Phase_CurrentFeedback_Pin GPIO_PIN_2
+#define W_Phase_CurrentFeedback_GPIO_Port GPIOC
+#define Debug_Tx_Pin GPIO_PIN_2
+#define Debug_Tx_GPIO_Port GPIOA
+#define Debug_RX_Pin GPIO_PIN_3
+#define Debug_RX_GPIO_Port GPIOA
+#define V_Phase_CurrentFeedback_Pin GPIO_PIN_5
+#define V_Phase_CurrentFeedback_GPIO_Port GPIOA
+#define U_Phase_LoSide_Pin GPIO_PIN_7
+#define U_Phase_LoSide_GPIO_Port GPIOA
+#define U_Phase_CurrentFeedback_Pin GPIO_PIN_5
+#define U_Phase_CurrentFeedback_GPIO_Port GPIOC
+#define V_Phase_LoSide_Pin GPIO_PIN_0
+#define V_Phase_LoSide_GPIO_Port GPIOB
+#define W_Phase_LoSide_Pin GPIO_PIN_1
+#define W_Phase_LoSide_GPIO_Port GPIOB
+#define U_Phase_HiSide_Pin GPIO_PIN_9
+#define U_Phase_HiSide_GPIO_Port GPIOE
+#define V_Phase_Hiside_Pin GPIO_PIN_11
+#define V_Phase_Hiside_GPIO_Port GPIOE
+#define W_Phase_Hiside_Pin GPIO_PIN_13
+#define W_Phase_Hiside_GPIO_Port GPIOE
+#define Encoder_A_Pin GPIO_PIN_6
+#define Encoder_A_GPIO_Port GPIOC
+#define Encoder_B_Pin GPIO_PIN_7
+#define Encoder_B_GPIO_Port GPIOC
 
 /* USER CODE BEGIN Private defines */
 
