@@ -81,6 +81,11 @@ class baseMcuAbstractionLayer {
 
     // Watchdog
     virtual void idwgResetCnt(void) = 0;
+
+    // Cordic
+    virtual float cordicSin(float a) = 0;
+    virtual float cordicCos(float a) = 0;
+    virtual void cordicSinCos(float a, float* s, float* c) = 0;
 };
 
 typedef baseMcuAbstractionLayer MAL;

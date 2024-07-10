@@ -9,6 +9,8 @@
 #include <cstring>
 #include "adc.h"
 // #include "iwdg.h"
+#include "cordic.h"
+#include "math.h"
 #include "tim.h"
 #include "usart.h"
 
@@ -346,4 +348,51 @@ void stm32halAbstractionLayer::waitMs(uint32_t ms) {
 // Watchdog
 void stm32halAbstractionLayer::idwgResetCnt(void) {
     // HAL_IWDG_Refresh(&hiwdg);
+}
+
+// Cordic
+
+inline int32_t stm32halAbstractionLayer::RadiansToQ31(float x) {
+    // First we scale, then wrap, and finally convert out.
+    const float scaled = x / 2 * M_PI;
+    // Now we wrap to be from 0 to 1.
+    const int32_t i = (int32_t)(scaled);
+    float mod = scaled - i;
+    if (mod < 0) {
+        mod += 1.0f;
+    }
+
+    return (int32_t)(((mod > 0.5f) ? (mod - 1.0f) : mod) * 4294967296.0f);
+}
+
+inline float stm32halAbstractionLayer::Q31ToRadians(int32_t x) {
+    return (float)(x) / 2147483648.0f;
+}
+
+float stm32halAbstractionLayer::cordicSin(float a) {
+    int32_t input_buffer = RadiansToQ31(a);
+    int32_t output_buffer[2] = {0};
+
+    HAL_CORDIC_Calculate(&hcordic, &input_buffer, output_buffer, 1, 0);
+
+    return Q31ToRadians(output_buffer[1]);  // 0 is cos, 1 is sin
+}
+
+float stm32halAbstractionLayer::cordicCos(float a) {
+    int32_t input_buffer = RadiansToQ31(a);
+    int32_t output_buffer[2] = {0};
+
+    HAL_CORDIC_Calculate(&hcordic, &input_buffer, output_buffer, 1, 0);
+
+    return Q31ToRadians(output_buffer[0]);  // 0 is cos, 1 is sin
+}
+
+void stm32halAbstractionLayer::cordicSinCos(float a, float* s, float* c) {
+    int32_t input_buffer = RadiansToQ31(a);
+    int32_t output_buffer[2] = {0};
+
+    HAL_CORDIC_Calculate(&hcordic, &input_buffer, output_buffer, 1, 0);
+
+    *s = Q31ToRadians(output_buffer[1]);  // 0 is cos, 1 is sin
+    *c = Q31ToRadians(output_buffer[0]);  // 0 is cos, 1 is sin
 }

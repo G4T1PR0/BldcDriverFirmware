@@ -6,6 +6,10 @@
  */
 
 #include "app_main.h"
+#include <Algorithm/AngleProcessor.hpp>
+#include <Algorithm/BldcController.hpp>
+#include <Algorithm/CurrentProcessor.hpp>
+#include <Algorithm/ModulationProcessor.hpp>
 #include <DeviceDriver/BLDCDriverMCU.hpp>
 #include <DeviceDriver/CurrentSensorMCU.hpp>
 #include <DeviceDriver/EncoderMCU.hpp>
@@ -16,6 +20,11 @@ stm32halAbstractionLayer mcu;
 CurrentSensorMCU currentSensor(&mcu, MAL::P_ADC::U_Current, MAL::P_ADC::V_Current, MAL::P_ADC::W_Current);
 BLDCDriverMCU Driver(&mcu, MAL::P_PWM::U_PWM, MAL::P_PWM::V_PWM, MAL::P_PWM::W_PWM);
 EncoderMCU encoder(&mcu, MAL::P_Encoder::Main_Encoder);
+
+AngleProcessor angleProcessor(&encoder);
+CurrentProcessor currentProcessor(&mcu, &currentSensor);
+ModulationProcessor modulationProcessor(&mcu, &Driver);
+BldcController bldcController(&angleProcessor, &currentProcessor, &modulationProcessor);
 
 void app_interrupt_50us();
 

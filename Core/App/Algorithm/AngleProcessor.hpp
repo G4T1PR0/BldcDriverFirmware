@@ -23,6 +23,14 @@ class AngleProcessor {
         _electricalAngle = _normalizeAngle(_mechanicalAngle * _polePairs * _direction);
     }
 
+    float getMechanicalAngle() {
+        return _mechanicalAngle;
+    }
+
+    float getElectricalAngle() {
+        return _electricalAngle;
+    }
+
     void setPolePairs(uint16_t polePairs) {
         _polePairs = polePairs;
     }

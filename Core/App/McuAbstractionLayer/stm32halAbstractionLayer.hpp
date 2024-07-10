@@ -53,6 +53,11 @@ class stm32halAbstractionLayer : public baseMcuAbstractionLayer {
     // Watchdog
     virtual void idwgResetCnt(void);
 
+    // Cordic
+    virtual float cordicSin(float a);
+    virtual float cordicCos(float a);
+    virtual void cordicSinCos(float a, float* s, float* c);
+
    private:
     // ADC
     void _initADC();
@@ -74,6 +79,10 @@ class stm32halAbstractionLayer : public baseMcuAbstractionLayer {
 
     // Interrupt
     void _initTimerInterrupt();
+
+    // Cordic
+    int32_t RadiansToQ31(float x);
+    float Q31ToRadians(int32_t x);
 };
 
 #endif /* APP_DEVICES_STM32HALABSTRACTIONLAYER_STM32HALABSTRACTIONLAYER_HPP_ */
