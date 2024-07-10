@@ -64,6 +64,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     Core/App/McuAbstractionLayer
     Core/App/DeviceDriver
     Core/App/DeviceDriver/Interface
+    Core/App/Algorithm
 )
 
 # Add project symbols (macros)
