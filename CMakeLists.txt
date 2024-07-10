@@ -12,7 +12,6 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)
 
-
 # Define the build type
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug")
@@ -42,21 +41,34 @@ add_subdirectory(cmake/stm32cubemx)
 
 # Link directories setup
 target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
+
     # Add user defined library search paths
 )
 
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
+
     # Add user sources here
+    Core/App/app_main.cpp
+    Core/App/McuAbstractionLayer/stm32halAbstractionLayer.cpp
+    Core/App/DeviceDriver/CurrentSensorMCU.cpp
+    Core/App/DeviceDriver/BLDCDriverMCU.cpp
+    Core/App/DeviceDriver/EncoderMCU.cpp
 )
 
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
+
     # Add user defined include paths
+    Core/App
+    Core/App/McuAbstractionLayer
+    Core/App/DeviceDriver
+    Core/App/DeviceDriver/Interface
 )
 
 # Add project symbols (macros)
 target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
+
     # Add user defined symbols
 )
 

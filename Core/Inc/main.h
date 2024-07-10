@@ -79,6 +79,10 @@ void Error_Handler(void);
 #define V_Phase_Hiside_GPIO_Port GPIOE
 #define W_Phase_Hiside_Pin GPIO_PIN_13
 #define W_Phase_Hiside_GPIO_Port GPIOE
+#define Controller_TX_Pin GPIO_PIN_10
+#define Controller_TX_GPIO_Port GPIOB
+#define Controller_RX_Pin GPIO_PIN_11
+#define Controller_RX_GPIO_Port GPIOB
 #define Encoder_A_Pin GPIO_PIN_6
 #define Encoder_A_GPIO_Port GPIOC
 #define Encoder_B_Pin GPIO_PIN_7
