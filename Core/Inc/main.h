@@ -57,6 +57,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define Vdrive_Switch_Pin GPIO_PIN_5
+#define Vdrive_Switch_GPIO_Port GPIOE
 #define W_Phase_CurrentFeedback_Pin GPIO_PIN_2
 #define W_Phase_CurrentFeedback_GPIO_Port GPIOC
 #define Debug_Tx_Pin GPIO_PIN_2
