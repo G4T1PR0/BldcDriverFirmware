@@ -87,6 +87,12 @@ void Error_Handler(void);
 #define Encoder_A_GPIO_Port GPIOC
 #define Encoder_B_Pin GPIO_PIN_7
 #define Encoder_B_GPIO_Port GPIOC
+#define HallSens_W_Pin GPIO_PIN_0
+#define HallSens_W_GPIO_Port GPIOD
+#define HallSens_V_Pin GPIO_PIN_2
+#define HallSens_V_GPIO_Port GPIOD
+#define HallSens_U_Pin GPIO_PIN_4
+#define HallSens_U_GPIO_Port GPIOD
 
 /* USER CODE BEGIN Private defines */
 
