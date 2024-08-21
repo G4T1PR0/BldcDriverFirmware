@@ -22,6 +22,7 @@
 #include "cordic.h"
 #include "crc.h"
 #include "memorymap.h"
+#include "spi.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -118,6 +119,7 @@ int main(void)
   MX_TIM7_Init();
   MX_CORDIC_Init();
   MX_CRC_Init();
+  MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */

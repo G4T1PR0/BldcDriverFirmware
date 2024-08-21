@@ -59,6 +59,8 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define Vdrive_Switch_Pin GPIO_PIN_5
 #define Vdrive_Switch_GPIO_Port GPIOE
+#define EXT_Enc_MOSI2_Pin GPIO_PIN_1
+#define EXT_Enc_MOSI2_GPIO_Port GPIOC
 #define W_Phase_CurrentFeedback_Pin GPIO_PIN_2
 #define W_Phase_CurrentFeedback_GPIO_Port GPIOC
 #define Debug_Tx_Pin GPIO_PIN_2
@@ -85,6 +87,10 @@ void Error_Handler(void);
 #define Controller_TX_GPIO_Port GPIOB
 #define Controller_RX_Pin GPIO_PIN_11
 #define Controller_RX_GPIO_Port GPIOB
+#define EXT_Enc_SCK2_Pin GPIO_PIN_13
+#define EXT_Enc_SCK2_GPIO_Port GPIOB
+#define EXT_Enc_MISO2_Pin GPIO_PIN_14
+#define EXT_Enc_MISO2_GPIO_Port GPIOB
 #define Encoder_A_Pin GPIO_PIN_6
 #define Encoder_A_GPIO_Port GPIOC
 #define Encoder_B_Pin GPIO_PIN_7
