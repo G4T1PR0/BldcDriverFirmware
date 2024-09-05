@@ -6,9 +6,9 @@ add_library(stm32cubemx INTERFACE)
 # Enable CMake support for ASM and C languages
 enable_language(C ASM)
 
-target_compile_definitions(stm32cubemx INTERFACE
-    USE_HAL_DRIVER
-    STM32H723xx
+target_compile_definitions(stm32cubemx INTERFACE 
+	USE_HAL_DRIVER 
+	STM32H723xx
     $<$<CONFIG:Debug>:DEBUG>
 )
 
@@ -27,6 +27,7 @@ target_sources(stm32cubemx INTERFACE
     ../../Core/Src/cordic.c
     ../../Core/Src/crc.c
     ../../Core/Src/memorymap.c
+    ../../Core/Src/spi.c
     ../../Core/Src/tim.c
     ../../Core/Src/usart.c
     ../../Core/Src/stm32h7xx_it.c
@@ -52,6 +53,8 @@ target_sources(stm32cubemx INTERFACE
     ../../Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_cordic.c
     ../../Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_crc.c
     ../../Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_crc_ex.c
+    ../../Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_spi.c
+    ../../Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_spi_ex.c
     ../../Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim.c
     ../../Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim_ex.c
     ../../Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart.c
@@ -72,3 +75,5 @@ target_link_libraries(stm32cubemx INTERFACE
 if(CMAKE_C_STANDARD LESS 11)
     message(ERROR "Generated code requires C11 or higher")
 endif()
+
+

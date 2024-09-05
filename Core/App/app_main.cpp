@@ -17,21 +17,21 @@
 
 stm32halAbstractionLayer mcu;
 
-CurrentSensorMCU currentSensor(&mcu, MAL::P_ADC::U_Current, MAL::P_ADC::V_Current, MAL::P_ADC::W_Current);
-BLDCDriverMCU Driver(&mcu, MAL::P_PWM::U_PWM, MAL::P_PWM::V_PWM, MAL::P_PWM::W_PWM);
-EncoderMCU encoder(&mcu, MAL::P_Encoder::Main_Encoder);
+// CurrentSensorMCU currentSensor(&mcu, MAL::P_ADC::U_Current, MAL::P_ADC::V_Current, MAL::P_ADC::W_Current);
+// BLDCDriverMCU Driver(&mcu, MAL::P_PWM::U_PWM, MAL::P_PWM::V_PWM, MAL::P_PWM::W_PWM);
+// EncoderMCU encoder(&mcu, MAL::P_Encoder::Main_Encoder);
 
-AngleProcessor angleProcessor(&encoder);
-CurrentProcessor currentProcessor(&mcu, &currentSensor);
-ModulationProcessor modulationProcessor(&mcu, &Driver);
-BldcController bldcController(&angleProcessor, &currentProcessor, &modulationProcessor);
+// AngleProcessor angleProcessor(&encoder);
+// CurrentProcessor currentProcessor(&mcu, &currentSensor);
+// ModulationProcessor modulationProcessor(&mcu, &Driver);
+// BldcController bldcController(&angleProcessor, &currentProcessor, &modulationProcessor);
 
 void app_interrupt_50us();
 
 void app_init() {
     mcu.init();
 
-    currentSensor.init();
+    // currentSensor.init();
 
     mcu.interruptSetCallback(MAL::P_Interrupt::T50us, app_interrupt_50us);
 
