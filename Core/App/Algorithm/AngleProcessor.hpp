@@ -12,7 +12,10 @@
 
 class AngleProcessor {
    public:
-    AngleProcessor(baseEncoder* encoder);
+    AngleProcessor(baseEncoder* encoder) {
+        _encoder = encoder;
+    }
+
     void init() {
         _polePairs = 0;
         _direction = 0;

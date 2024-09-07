@@ -16,7 +16,6 @@ class baseMcuAbstractionLayer {
         U_Current,
         V_Current,
         W_Current,
-        Batt_Voltage,
         End_A,
     };
 

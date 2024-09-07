@@ -17,14 +17,14 @@
 
 stm32halAbstractionLayer mcu;
 
-// CurrentSensorMCU currentSensor(&mcu, MAL::P_ADC::U_Current, MAL::P_ADC::V_Current, MAL::P_ADC::W_Current);
-// BLDCDriverMCU Driver(&mcu, MAL::P_PWM::U_PWM, MAL::P_PWM::V_PWM, MAL::P_PWM::W_PWM);
-// EncoderMCU encoder(&mcu, MAL::P_Encoder::Main_Encoder);
+CurrentSensorMCU currentSensor(&mcu, MAL::P_ADC::U_Current, MAL::P_ADC::V_Current, MAL::P_ADC::W_Current);
+BLDCDriverMCU Driver(&mcu, MAL::P_PWM::U_PWM, MAL::P_PWM::V_PWM, MAL::P_PWM::W_PWM);
+EncoderMCU encoder(&mcu, MAL::P_Encoder::Main_Encoder);
 
-// AngleProcessor angleProcessor(&encoder);
-// CurrentProcessor currentProcessor(&mcu, &currentSensor);
-// ModulationProcessor modulationProcessor(&mcu, &Driver);
-// BldcController bldcController(&angleProcessor, &currentProcessor, &modulationProcessor);
+AngleProcessor angleProcessor(&encoder);
+CurrentProcessor currentProcessor(&mcu, &currentSensor);
+ModulationProcessor modulationProcessor(&mcu, &Driver);
+BldcController bldcController(&angleProcessor, &currentProcessor, &modulationProcessor);
 
 void app_interrupt_50us();
 
@@ -59,6 +59,12 @@ void app_init() {
 void app_main() {
     app_init();
     printf("Hello World!\n");
+
+    mcu.pwmSetDuty(MAL::P_PWM::U_PWM, 0.5);
+    mcu.pwmSetDuty(MAL::P_PWM::V_PWM, 0.5);
+    mcu.pwmSetDuty(MAL::P_PWM::W_PWM, 0.5);
+
+    mcu.gpioSetValue(MAL::P_GPIO::Driver_Power_Switch, true);
 
     while (1) {
         mcu.waitMs(1000);

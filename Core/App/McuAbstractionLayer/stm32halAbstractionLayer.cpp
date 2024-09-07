@@ -57,11 +57,23 @@ stm32halAbstractionLayer::stm32halAbstractionLayer() {
 
     PAL.ADC_Connected[MAL::P_ADC::W_Current] = PeripheralAllocation::STM_ADC::ADC_3;
     PAL.ADC_INJECTED_RANK[MAL::P_ADC::W_Current] = 1;
+
     // PWM
+    PAL.PWM_TIM[MAL::P_PWM::U_PWM] = &htim1;
+    PAL.PWM_CH[MAL::P_PWM::U_PWM] = TIM_CHANNEL_1;
+
+    PAL.PWM_TIM[MAL::P_PWM::V_PWM] = &htim1;
+    PAL.PWM_CH[MAL::P_PWM::V_PWM] = TIM_CHANNEL_2;
+
+    PAL.PWM_TIM[MAL::P_PWM::W_PWM] = &htim1;
+    PAL.PWM_CH[MAL::P_PWM::W_PWM] = TIM_CHANNEL_3;
 
     // Encoder
+    PAL.Encoder_TIM[MAL::P_Encoder::Main_Encoder] = &htim8;
 
     // GPIO
+    PAL.GPIO_PORT[MAL::P_GPIO::Driver_Power_Switch] = Vdrive_Switch_GPIO_Port;
+    PAL.GPIO_PIN[MAL::P_GPIO::Driver_Power_Switch] = Vdrive_Switch_Pin;
 
     // UART
     PAL.UART[MAL::P_UART::Controller] = &huart3;
@@ -84,88 +96,42 @@ void stm32halAbstractionLayer::init() {
 uint16_t stm32halAbstractionLayer::_data[PAL.STM_ADC::ADC_END][3 * ADC_BUFFER_SIZE] = {0};
 
 void stm32halAbstractionLayer::_initADC(void) {
-    // if (HAL_ADC_Start_DMA(PAL.ADC_Ins[PeripheralAllocation::STM_ADC::ADC_1], (uint32_t*)this->_data[PeripheralAllocation::STM_ADC::ADC_1], 2 * ADC_BUFFER_SIZE) !=
-    //     HAL_OK) {
-    //     Error_Handler();
-    // }
-    // __HAL_DMA_DISABLE_IT(PAL.ADC_Ins[PeripheralAllocation::STM_ADC::ADC_1]->DMA_Handle, DMA_IT_TC | DMA_IT_HT);
-
-    // if (HAL_ADC_Start_DMA(PAL.ADC_Ins[PeripheralAllocation::STM_ADC::ADC_2], (uint32_t*)this->_data[PeripheralAllocation::STM_ADC::ADC_2], 3 * ADC_BUFFER_SIZE) !=
-    //     HAL_OK) {
-    //     Error_Handler();
-    // }
-    // __HAL_DMA_DISABLE_IT(PAL.ADC_Ins[PeripheralAllocation::STM_ADC::ADC_2]->DMA_Handle, DMA_IT_TC | DMA_IT_HT);
-
-    // if (HAL_ADC_Start_DMA(PAL.ADC_Ins[PeripheralAllocation::STM_ADC::ADC_3], (uint32_t*)this->_data[PeripheralAllocation::STM_ADC::ADC_3], 2 * ADC_BUFFER_SIZE) !=
-    //     HAL_OK) {
-    //     Error_Handler();
-    // }
-    // __HAL_DMA_DISABLE_IT(PAL.ADC_Ins[PeripheralAllocation::STM_ADC::ADC_3]->DMA_Handle, DMA_IT_TC | DMA_IT_HT);
-
-    // HAL_ADCEx_InjectedStart(PAL.ADC_Ins[PeripheralAllocation::STM_ADC::ADC_1]);
-    // HAL_ADCEx_InjectedStart(PAL.ADC_Ins[PeripheralAllocation::STM_ADC::ADC_2]);
-    // HAL_ADCEx_InjectedStart(PAL.ADC_Ins[PeripheralAllocation::STM_ADC::ADC_3]);
+    HAL_ADCEx_InjectedStart(PAL.ADC_Ins[PeripheralAllocation::STM_ADC::ADC_1]);
+    HAL_ADCEx_InjectedStart(PAL.ADC_Ins[PeripheralAllocation::STM_ADC::ADC_2]);
+    HAL_ADCEx_InjectedStart(PAL.ADC_Ins[PeripheralAllocation::STM_ADC::ADC_3]);
 }
 
 uint16_t stm32halAbstractionLayer::adcGetValue(P_ADC p) {
-    // if (p != P_ADC::End_A) {
-    //     if (p == P_ADC::FL_Current) {
-    //         return HAL_ADCEx_InjectedGetValue(PAL.ADC_Ins[PeripheralAllocation::STM_ADC::ADC_3], 1);
-    //     }
-    //     if (p == P_ADC::FR_Current) {
-    //         return HAL_ADCEx_InjectedGetValue(PAL.ADC_Ins[PeripheralAllocation::STM_ADC::ADC_3], 2);
-    //     }
-
-    //     if (p == P_ADC::ST_Current) {
-    //         return HAL_ADCEx_InjectedGetValue(PAL.ADC_Ins[PeripheralAllocation::STM_ADC::ADC_2], 1);
-    //     }
-
-    //     if (p == P_ADC::RL_Current) {
-    //         return HAL_ADCEx_InjectedGetValue(PAL.ADC_Ins[PeripheralAllocation::STM_ADC::ADC_2], 2);
-    //     }
-
-    //     if (p == P_ADC::RR_Current) {
-    //         return HAL_ADCEx_InjectedGetValue(PAL.ADC_Ins[PeripheralAllocation::STM_ADC::ADC_1], 1);
-    //     }
-
-    //     return this->_data[PAL.ADC_Connected[p]][PAL.ADC_RANK[PAL.ADC_Connected[p]][p]];
-    // }
+    if (p != P_ADC::End_A) {
+        if (p == P_ADC::U_Current) {
+            return HAL_ADCEx_InjectedGetValue(PAL.ADC_Ins[PAL.ADC_Connected[U_Current]], PAL.ADC_INJECTED_RANK[U_Current]);
+        }
+        if (p == P_ADC::V_Current) {
+            return HAL_ADCEx_InjectedGetValue(PAL.ADC_Ins[PAL.ADC_Connected[V_Current]], PAL.ADC_INJECTED_RANK[V_Current]);
+        }
+        if (p == P_ADC::W_Current) {
+            return HAL_ADCEx_InjectedGetValue(PAL.ADC_Ins[PAL.ADC_Connected[W_Current]], PAL.ADC_INJECTED_RANK[W_Current]);
+        }
+    }
     return 0;
 }
 
 void stm32halAbstractionLayer::adcGetBufferValue(P_ADC p, uint16_t* buffer, uint16_t size) {
     if (p != P_ADC::End_A) {
-        // switch (PAL.ADC_Connected[p]) {
-        //     case PeripheralAllocation::STM_ADC::ADC_1:
-        //         for (int i = 0; i < size; i++) {
-        //             buffer[i] = this->_data[PAL.ADC_Connected[p]][i * 2 + PAL.ADC_RANK[PAL.ADC_Connected[p]][p]];
-        //         }
-        //         break;
-
-        //     case PeripheralAllocation::STM_ADC::ADC_2:
-        //         for (int i = 0; i < size; i++) {
-        //             buffer[i] = this->_data[PAL.ADC_Connected[p]][i * 3 + PAL.ADC_RANK[PAL.ADC_Connected[p]][p]];
-        //         }
-        //         break;
-
-        //     case PeripheralAllocation::STM_ADC::ADC_3:
-        //         for (int i = 0; i < size; i++) {
-        //             buffer[i] = this->_data[PAL.ADC_Connected[p]][i * 2 + PAL.ADC_RANK[PAL.ADC_Connected[p]][p]];
-        //         }
-        //         break;
-
-        //     default:
-        //         break;
-        // }
     }
 }
 
 // PWM
 
 void stm32halAbstractionLayer::_initPWM() {
-    // HAL_TIM_PWM_Start(PAL.PWM_TIM[MAL::P_PWM::FL_PWM], PAL.PWM_CH[MAL::P_PWM::FL_PWM]);
+    HAL_TIM_PWM_Start(PAL.PWM_TIM[MAL::P_PWM::U_PWM], PAL.PWM_CH[MAL::P_PWM::U_PWM]);
+    HAL_TIMEx_PWMN_Start(PAL.PWM_TIM[MAL::P_PWM::U_PWM], PAL.PWM_CH[MAL::P_PWM::U_PWM]);
 
-    // HAL_TIM_PWM_Start(PAL.MASTER_TIM, TIM_CHANNEL_1);
+    HAL_TIM_PWM_Start(PAL.PWM_TIM[MAL::P_PWM::V_PWM], PAL.PWM_CH[MAL::P_PWM::V_PWM]);
+    HAL_TIMEx_PWMN_Start(PAL.PWM_TIM[MAL::P_PWM::V_PWM], PAL.PWM_CH[MAL::P_PWM::V_PWM]);
+
+    HAL_TIM_PWM_Start(PAL.PWM_TIM[MAL::P_PWM::W_PWM], PAL.PWM_CH[MAL::P_PWM::W_PWM]);
+    HAL_TIMEx_PWMN_Start(PAL.PWM_TIM[MAL::P_PWM::W_PWM], PAL.PWM_CH[MAL::P_PWM::W_PWM]);
 }
 
 void stm32halAbstractionLayer::pwmSetDuty(P_PWM p, float duty) {
@@ -231,7 +197,7 @@ void stm32halAbstractionLayer::pwmSetFrequency(P_PWM p, uint32_t frequency) {
 // Encoder
 
 void stm32halAbstractionLayer::_initEncoder() {
-    // HAL_TIM_Encoder_Start(PAL.Encoder_TIM[MAL::P_Encoder::FL_Encoder], TIM_CHANNEL_ALL);
+    HAL_TIM_Encoder_Start(PAL.Encoder_TIM[MAL::P_Encoder::Main_Encoder], TIM_CHANNEL_ALL);
 }
 
 void stm32halAbstractionLayer::encoderSetCnt(P_Encoder p, uint32_t cnt) {
