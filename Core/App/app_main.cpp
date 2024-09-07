@@ -61,6 +61,8 @@ void app_main() {
     printf("Hello World!\n");
 
     while (1) {
+        mcu.waitMs(1000);
+        printf("Hello World!\n");
     }
 }
 

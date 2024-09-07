@@ -24,7 +24,8 @@ struct PeripheralAllocation {
 
     ADC_HandleTypeDef* ADC_Ins[ADC_END];
     STM_ADC ADC_Connected[MAL::P_ADC::End_A];
-    uint8_t ADC_RANK[ADC_END][MAL::P_ADC::End_A];
+    uint8_t ADC_RANK[MAL::P_ADC::End_A];
+    uint8_t ADC_INJECTED_RANK[MAL::P_ADC::End_A];
 
     TIM_HandleTypeDef* PWM_TIM[MAL::P_PWM::End_P];
     uint32_t PWM_CH[MAL::P_PWM::End_P];
@@ -44,7 +45,18 @@ static PeripheralAllocation PAL;
 
 stm32halAbstractionLayer::stm32halAbstractionLayer() {
     // ADC
+    PAL.ADC_Ins[PeripheralAllocation::STM_ADC::ADC_1] = &hadc1;
+    PAL.ADC_Ins[PeripheralAllocation::STM_ADC::ADC_2] = &hadc2;
+    PAL.ADC_Ins[PeripheralAllocation::STM_ADC::ADC_3] = &hadc3;
 
+    PAL.ADC_Connected[MAL::P_ADC::U_Current] = PeripheralAllocation::STM_ADC::ADC_2;
+    PAL.ADC_INJECTED_RANK[MAL::P_ADC::U_Current] = 1;
+
+    PAL.ADC_Connected[MAL::P_ADC::V_Current] = PeripheralAllocation::STM_ADC::ADC_1;
+    PAL.ADC_INJECTED_RANK[MAL::P_ADC::V_Current] = 1;
+
+    PAL.ADC_Connected[MAL::P_ADC::W_Current] = PeripheralAllocation::STM_ADC::ADC_3;
+    PAL.ADC_INJECTED_RANK[MAL::P_ADC::W_Current] = 1;
     // PWM
 
     // Encoder
@@ -123,28 +135,28 @@ uint16_t stm32halAbstractionLayer::adcGetValue(P_ADC p) {
 
 void stm32halAbstractionLayer::adcGetBufferValue(P_ADC p, uint16_t* buffer, uint16_t size) {
     if (p != P_ADC::End_A) {
-        switch (PAL.ADC_Connected[p]) {
-            case PeripheralAllocation::STM_ADC::ADC_1:
-                for (int i = 0; i < size; i++) {
-                    buffer[i] = this->_data[PAL.ADC_Connected[p]][i * 2 + PAL.ADC_RANK[PAL.ADC_Connected[p]][p]];
-                }
-                break;
+        // switch (PAL.ADC_Connected[p]) {
+        //     case PeripheralAllocation::STM_ADC::ADC_1:
+        //         for (int i = 0; i < size; i++) {
+        //             buffer[i] = this->_data[PAL.ADC_Connected[p]][i * 2 + PAL.ADC_RANK[PAL.ADC_Connected[p]][p]];
+        //         }
+        //         break;
 
-            case PeripheralAllocation::STM_ADC::ADC_2:
-                for (int i = 0; i < size; i++) {
-                    buffer[i] = this->_data[PAL.ADC_Connected[p]][i * 3 + PAL.ADC_RANK[PAL.ADC_Connected[p]][p]];
-                }
-                break;
+        //     case PeripheralAllocation::STM_ADC::ADC_2:
+        //         for (int i = 0; i < size; i++) {
+        //             buffer[i] = this->_data[PAL.ADC_Connected[p]][i * 3 + PAL.ADC_RANK[PAL.ADC_Connected[p]][p]];
+        //         }
+        //         break;
 
-            case PeripheralAllocation::STM_ADC::ADC_3:
-                for (int i = 0; i < size; i++) {
-                    buffer[i] = this->_data[PAL.ADC_Connected[p]][i * 2 + PAL.ADC_RANK[PAL.ADC_Connected[p]][p]];
-                }
-                break;
+        //     case PeripheralAllocation::STM_ADC::ADC_3:
+        //         for (int i = 0; i < size; i++) {
+        //             buffer[i] = this->_data[PAL.ADC_Connected[p]][i * 2 + PAL.ADC_RANK[PAL.ADC_Connected[p]][p]];
+        //         }
+        //         break;
 
-            default:
-                break;
-        }
+        //     default:
+        //         break;
+        // }
     }
 }
 
