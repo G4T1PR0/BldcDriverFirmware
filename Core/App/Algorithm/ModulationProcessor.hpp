@@ -25,7 +25,9 @@ class ModulationProcessor {
         float cos;
         float sin;
 
-        _mcu->cordicSinCos(_electric_angle, &sin, &cos);
+        //_mcu->cordicSinCos(_electric_angle, &sin, &cos);
+        sin = sinf(_electric_angle);
+        cos = cosf(_electric_angle);
 
         float alpha = cos * _voltage_d - sin * _voltage_q;
         float beta = sin * _voltage_d + cos * _voltage_q;
@@ -50,13 +52,21 @@ class ModulationProcessor {
         float v_pwm = Vb / _voltage_limit;
         float w_pwm = Vc / _voltage_limit;
 
+        _driver->enable(true);
         _driver->setPWM(u_pwm, v_pwm, w_pwm);
+        _driver->update();
+
+        // printf("U_PWM: %f, V_PWM: %f, W_PWM: %f\n", u_pwm, v_pwm, w_pwm);
     }
 
     void setVoltage(float voltage_q, float voltage_d, float electric_angle) {
         _voltage_q = voltage_q;
         _voltage_d = voltage_d;
         _electric_angle = electric_angle;
+    }
+
+    void setVoltageLimit(float voltage_limit) {
+        _voltage_limit = voltage_limit;
     }
 
    private:
@@ -67,7 +77,7 @@ class ModulationProcessor {
     float _voltage_d;
     float _electric_angle;
 
-    float _voltage_limit = 12;
+    float _voltage_limit = 15;
 
     const float _sqrt3_2 = sqrt(3) / 2;
 

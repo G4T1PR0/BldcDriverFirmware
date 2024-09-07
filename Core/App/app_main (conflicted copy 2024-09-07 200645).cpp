@@ -71,7 +71,7 @@ void app_main() {
         // printf("e_angle: %f ", e_angle);
         modulationProcessor.setVoltage(3, 0, e_angle);
         modulationProcessor.update();
-        e_angle += 0.4;
+        e_angle += 0.6;
         if (e_angle > 6.28) {
             e_angle = 0;
         }

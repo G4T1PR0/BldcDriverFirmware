@@ -23,6 +23,7 @@ void CurrentSensorMCU::init(void) {
         _currentSensorOffset_Sum[U_C] += _mcu->adcGetValue(_u);
         _currentSensorOffset_Sum[V_C] += _mcu->adcGetValue(_v);
         _currentSensorOffset_Sum[W_C] += _mcu->adcGetValue(_w);
+        _mcu->waitMs(1);
     }
 
     _currentSensorOffset[U_C] = _currentSensorOffset_Sum[U_C] / _currentSensorOffset_NUM;
