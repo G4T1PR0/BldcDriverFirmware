@@ -18,20 +18,32 @@
 stm32halAbstractionLayer mcu;
 
 CurrentSensorMCU currentSensor(&mcu, MAL::P_ADC::U_Current, MAL::P_ADC::V_Current, MAL::P_ADC::W_Current);
-BLDCDriverMCU Driver(&mcu, MAL::P_PWM::U_PWM, MAL::P_PWM::V_PWM, MAL::P_PWM::W_PWM);
+BLDCDriverMCU driver(&mcu, MAL::P_PWM::U_PWM, MAL::P_PWM::V_PWM, MAL::P_PWM::W_PWM);
 EncoderMCU encoder(&mcu, MAL::P_Encoder::Main_Encoder);
 
 AngleProcessor angleProcessor(&encoder);
 CurrentProcessor currentProcessor(&mcu, &currentSensor);
-ModulationProcessor modulationProcessor(&mcu, &Driver);
+ModulationProcessor modulationProcessor(&mcu, &driver);
 BldcController bldcController(&angleProcessor, &currentProcessor, &modulationProcessor);
+
+unsigned int print_cnt = 0;
+unsigned int mode_cnt = 0;
+unsigned int timer_1ms_cnt = 0;
 
 void app_interrupt_50us();
 
 void app_init() {
     mcu.init();
 
-    // currentSensor.init();
+    currentSensor.init();
+    driver.init();
+    encoder.init();
+
+    angleProcessor.init();
+    modulationProcessor.init();
+    currentProcessor.init();
+
+    bldcController.init();
 
     mcu.interruptSetCallback(MAL::P_Interrupt::T50us, app_interrupt_50us);
 
@@ -58,32 +70,43 @@ void app_init() {
 
 void app_main() {
     app_init();
-    mcu.pwmSetDuty(MAL::P_PWM::U_PWM, 0.1);
-    mcu.pwmSetDuty(MAL::P_PWM::V_PWM, 0.1);
-    mcu.pwmSetDuty(MAL::P_PWM::W_PWM, 0.1);
 
     mcu.gpioSetValue(MAL::P_GPIO::Driver_Power_Switch, true);
 
-    float e_angle = 0;
+    printf("\x1b[32m[Main Thread]\x1b[39m Calibration Start\n");
+
+    bldcController.setMode(BldcController::Mode::Calibration1);
+
+    while (bldcController.getMode() != BldcController::Mode::Stop) {
+    }
+
+    printf("\x1b[32m[Main Thread]\x1b[39m Calibration End\n");
 
     while (1) {
-        mcu.waitMs(1);
-        // printf("e_angle: %f ", e_angle);
-        modulationProcessor.setVoltage(3, 0, e_angle);
-        modulationProcessor.update();
-        e_angle += 0.4;
-        if (e_angle > 6.28) {
-            e_angle = 0;
+        // if (mode_cnt > 2000) {
+        //     mode_cnt = 0;
+        // } else if (mode_cnt > 1000) {
+        //     bldcController.setMode(BldcController::Mode::VoltageControl);
+        // } else {
+        //     bldcController.setMode(BldcController::Mode::Stop);
+        // }
+
+        // bldcController.setMode(BldcController::Mode::VoltageControl);
+
+        if (print_cnt > 100) {
+            printf("e_a %f\n", angleProcessor.getElectricalAngle());
+            print_cnt = 0;
         }
     }
 }
 
-unsigned int cnt = 0;
-
 void app_interrupt_50us() {
-    // if (cnt > 20) {
-    //     cnt = 0;
-    //     modulationProcessor.update();
-    // }
-    // cnt++;
+    bldcController.update();
+
+    if (timer_1ms_cnt > 20) {
+        print_cnt++;
+        mode_cnt++;
+        timer_1ms_cnt = 0;
+    }
+    timer_1ms_cnt++;
 }

@@ -17,13 +17,14 @@ class AngleProcessor {
     }
 
     void init() {
-        _polePairs = 0;
+        _polePairs = 1;
         _direction = 0;
-        _encoderResolution = 0;
     }
+
     void update() {
-        _mechanicalAngle = (float)_encoder->getCnt() * 2 * M_PI / _encoderResolution;
-        _electricalAngle = _normalizeAngle(_mechanicalAngle * _polePairs * _direction);
+        _encoder->update();
+        _mechanicalAngle = _encoder->getAngle();
+        _electricalAngle = _calcElectricalAngle();
     }
 
     float getMechanicalAngle() {
@@ -37,28 +38,40 @@ class AngleProcessor {
     void setPolePairs(uint16_t polePairs) {
         _polePairs = polePairs;
     }
+
     void setDirection(bool direction) {
         _direction = direction;
     }
-    void setEncoderResolution(uint16_t encoderResolution) {
-        _encoderResolution = encoderResolution;
+
+    void setZero() {
+        // _zero_electrical_angle = _calcElectricalAngle();
     }
 
    private:
     baseEncoder* _encoder;
 
-    uint16_t _polePairs;
-    bool _direction;
-    uint16_t _encoderResolution;
+    uint16_t _polePairs = 1;
+    bool _direction = 1;
 
-    float _mechanicalAngle;
-    float _electricalAngle;
+    float _mechanicalAngle = 0;
+    float _electricalAngle = 0;
+    float _zero_electrical_angle = 0;
+
+    float _calcElectricalAngle() {
+        if (_direction) {
+            return _normalizeAngle(-1 * _polePairs * _mechanicalAngle - _zero_electrical_angle);
+        } else {
+            return _normalizeAngle(_polePairs * _mechanicalAngle - _zero_electrical_angle);
+        }
+    }
 
     float _normalizeAngle(float angle) {
         float a = fmod(angle, 2 * M_PI);
+
         if (a < 0) {
             a += 2 * M_PI;
         }
+
         return a;
     }
 };

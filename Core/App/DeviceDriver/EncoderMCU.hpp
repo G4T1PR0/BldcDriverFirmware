@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <math.h>
 #include <DeviceDriver/Interface/baseEncoder.hpp>
 #include <McuAbstractionLayer/baseMcuAbstractionLayer.hpp>
 
@@ -16,6 +17,10 @@ class EncoderMCU : public baseEncoder {
     void init();
     void update();
     int32_t getCnt();
+    int32_t getTotalCnt();
+    float getAngle();
+    void setCpr(uint16_t cpr);
+    void setZero();
 
    private:
     MAL* _mcu;
@@ -23,5 +28,7 @@ class EncoderMCU : public baseEncoder {
 
     const uint32_t _offset = 32767;
 
+    uint16_t _cpr;
     int32_t _cnt;
+    int32_t _total_cnt;
 };

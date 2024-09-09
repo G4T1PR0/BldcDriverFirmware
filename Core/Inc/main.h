@@ -97,8 +97,10 @@ void Error_Handler(void);
 #define Encoder_B_GPIO_Port GPIOC
 #define HallSens_W_Pin GPIO_PIN_0
 #define HallSens_W_GPIO_Port GPIOD
+#define HallSens_W_EXTI_IRQn EXTI0_IRQn
 #define HallSens_V_Pin GPIO_PIN_2
 #define HallSens_V_GPIO_Port GPIOD
+#define HallSens_V_EXTI_IRQn EXTI2_IRQn
 #define HallSens_U_Pin GPIO_PIN_4
 #define HallSens_U_GPIO_Port GPIOD
 

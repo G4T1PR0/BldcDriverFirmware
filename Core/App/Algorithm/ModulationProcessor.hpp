@@ -26,8 +26,14 @@ class ModulationProcessor {
         float sin;
 
         //_mcu->cordicSinCos(_electric_angle, &sin, &cos);
-        sin = sinf(_electric_angle);
-        cos = cosf(_electric_angle);
+
+        float angle_el = _normalizeAngle(_electric_angle + M_PI / 2);
+
+        sin = sinf(angle_el);
+        cos = cosf(angle_el);
+
+        // sin = sinf(_electric_angle);
+        // cos = cosf(_electric_angle);
 
         float alpha = cos * _voltage_d - sin * _voltage_q;
         float beta = sin * _voltage_d + cos * _voltage_q;
@@ -77,7 +83,7 @@ class ModulationProcessor {
     float _voltage_d;
     float _electric_angle;
 
-    float _voltage_limit = 15;
+    float _voltage_limit = 12;
 
     const float _sqrt3_2 = sqrt(3) / 2;
 
@@ -87,5 +93,15 @@ class ModulationProcessor {
 
     float _max(float a, float b) {
         return a > b ? a : b;
+    }
+
+    float _normalizeAngle(float angle) {
+        float a = fmod(angle, 2 * M_PI);
+
+        if (a < 0) {
+            a += 2 * M_PI;
+        }
+
+        return a;
     }
 };

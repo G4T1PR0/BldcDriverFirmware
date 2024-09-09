@@ -13,13 +13,34 @@ EncoderMCU::EncoderMCU(MAL* mcu, MAL::P_Encoder encoder) {
 }
 
 void EncoderMCU::init() {
+    _cnt = 0;
+    _total_cnt = 0;
+    _cpr = 1024;
+    _mcu->encoderSetCnt(_encoder, _offset);
 }
 
 void EncoderMCU::update() {
     _cnt = _mcu->encoderGetCnt(_encoder) - _offset;
     _mcu->encoderSetCnt(_encoder, _offset);
+    _total_cnt += _cnt;
 }
 
 int32_t EncoderMCU::getCnt() {
     return _cnt;
+}
+
+int32_t EncoderMCU::getTotalCnt() {
+    return _total_cnt;
+}
+
+float EncoderMCU::getAngle() {
+    return (float)_total_cnt / _cpr * 2 * M_PI;
+}
+
+void EncoderMCU::setCpr(uint16_t cpr) {
+    _cpr = cpr;
+}
+
+void EncoderMCU::setZero() {
+    _total_cnt = 0;
 }
