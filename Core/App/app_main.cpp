@@ -82,6 +82,8 @@ void app_main() {
 
     printf("\x1b[32m[Main Thread]\x1b[39m Calibration End\n");
 
+    bldcController.setMode(BldcController::Mode::VoltageControl);
+
     while (1) {
         // if (mode_cnt > 2000) {
         //     mode_cnt = 0;
@@ -94,7 +96,8 @@ void app_main() {
         // bldcController.setMode(BldcController::Mode::VoltageControl);
 
         if (print_cnt > 100) {
-            printf("e_a %f\n", angleProcessor.getElectricalAngle());
+            // printf("e_a %f\n", angleProcessor.getElectricalAngle());
+            printf("encoder %ld\n", encoder.getTotalCnt());
             print_cnt = 0;
         }
     }

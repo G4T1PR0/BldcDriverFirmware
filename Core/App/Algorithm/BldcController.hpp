@@ -59,7 +59,7 @@ class BldcController {
                 break;
 
             case Mode::VoltageControl:
-                _modulationProcessor->setVoltage(2, 0, _angleProcessor->getElectricalAngle());
+                _modulationProcessor->setVoltage(4, 0, _angleProcessor->getElectricalAngle());
                 break;
 
             default:

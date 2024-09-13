@@ -16,13 +16,25 @@ void EncoderMCU::init() {
     _cnt = 0;
     _total_cnt = 0;
     _cpr = 1024;
-    _mcu->encoderSetCnt(_encoder, _offset);
+
+    _mcu->encoderSetCnt(_encoder, 0);
 }
 
 void EncoderMCU::update() {
-    _cnt = _mcu->encoderGetCnt(_encoder) - _offset;
-    _mcu->encoderSetCnt(_encoder, _offset);
-    _total_cnt += _cnt;
+    // _cnt = _mcu->encoderGetCnt(_encoder) - _offset;
+    // _mcu->encoderSetCnt(_encoder, _offset);
+    // _total_cnt += _cnt;
+
+    _prev_cnt = _current_cnt;
+    _current_cnt = _mcu->encoderGetCnt(_encoder);
+
+    if (_current_cnt - _prev_cnt > 32768) {
+        _total_cnt += _current_cnt - _prev_cnt - 65536;
+    } else if (_current_cnt - _prev_cnt < -32768) {
+        _total_cnt += _current_cnt - _prev_cnt + 65536;
+    } else {
+        _total_cnt += _current_cnt - _prev_cnt;
+    }
 }
 
 int32_t EncoderMCU::getCnt() {

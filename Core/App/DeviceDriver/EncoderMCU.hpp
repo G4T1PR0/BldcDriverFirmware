@@ -28,7 +28,10 @@ class EncoderMCU : public baseEncoder {
 
     const uint32_t _offset = 32767;
 
-    uint16_t _cpr;
-    int32_t _cnt;
-    int32_t _total_cnt;
+    uint16_t _cpr = 0;
+    int32_t _cnt = 0;
+    int32_t _total_cnt = 0;
+
+    int32_t _current_cnt = 0;
+    int32_t _prev_cnt = 0;
 };
