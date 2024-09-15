@@ -23,6 +23,7 @@ class BldcController {
         UnInitilized,
         Calibration1,
         Calibration2,
+        Calibration3,
         Stop,
         VoltageControl,
         CurrentControl,
@@ -34,7 +35,7 @@ class BldcController {
 
     void update() {
         _angleProcessor->update();
-        // _currentProcessor->update(_angleProcessor->getElectricalAngle());
+        _currentProcessor->update(_angleProcessor->getElectricalAngle());
 
         switch (_mode) {
             case Mode::UnInitilized:
@@ -43,13 +44,23 @@ class BldcController {
             case Mode::Calibration1: {
                 _modulationProcessor->setVoltage(5, 0, _calib_e_angle);
                 _calib_e_angle += 0.0005;
-                if (_calib_e_angle > 6.28) {
+                if (_calib_e_angle >= M_PI * 3 / 2) {
+                    _modulationProcessor->setVoltage(5, 0, M_PI * 3 / 2);
                     _mode = Mode::Calibration2;
                 }
             } break;
 
             case Mode::Calibration2:
-                _modulationProcessor->setVoltage(5, 0, 0);
+                _modulationProcessor->setVoltage(5, 0, M_PI * 3 / 2);
+
+                calib_cnt++;
+                if (calib_cnt > 700 * 20) {
+                    _mode = Mode::Calibration3;
+                }
+                break;
+
+            case Calibration3:
+                _modulationProcessor->setVoltage(5, 0, M_PI * 3 / 2);
                 _angleProcessor->setZero();
                 _mode = Mode::Stop;
                 break;
@@ -59,7 +70,10 @@ class BldcController {
                 break;
 
             case Mode::VoltageControl:
-                _modulationProcessor->setVoltage(4, 0, _angleProcessor->getElectricalAngle());
+                _modulationProcessor->setVoltage(_voltage_q, _voltage_d, _angleProcessor->getElectricalAngle());
+                break;
+
+            case Mode::CurrentControl:
                 break;
 
             default:
@@ -70,11 +84,20 @@ class BldcController {
     }
 
     void setMode(Mode mode) {
-        _mode = mode;
+        if (mode != Mode::Calibration2 || mode != Mode::Calibration3) {
+            _mode = mode;
+        } else {
+            _mode = Mode::UnInitilized;
+        }
     }
 
     Mode getMode() {
         return _mode;
+    }
+
+    void setVoltage(float voltage_q, float voltage_d) {
+        _voltage_q = voltage_q;
+        _voltage_d = voltage_d;
     }
 
    private:
@@ -85,4 +108,8 @@ class BldcController {
     Mode _mode;
 
     float _calib_e_angle = 0;
+    unsigned int calib_cnt = 0;
+
+    float _voltage_q = 0;
+    float _voltage_d = 0;
 };

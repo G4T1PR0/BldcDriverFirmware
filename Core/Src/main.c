@@ -124,6 +124,7 @@ int main(void)
   MX_CORDIC_Init();
   MX_CRC_Init();
   MX_SPI2_Init();
+  MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */

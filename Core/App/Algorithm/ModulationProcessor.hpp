@@ -19,6 +19,7 @@ class ModulationProcessor {
     }
 
     void init() {
+        _driver->enable(true);
     }
 
     void update() {
@@ -58,7 +59,6 @@ class ModulationProcessor {
         float v_pwm = Vb / _voltage_limit;
         float w_pwm = Vc / _voltage_limit;
 
-        _driver->enable(true);
         _driver->setPWM(u_pwm, v_pwm, w_pwm);
         _driver->update();
 

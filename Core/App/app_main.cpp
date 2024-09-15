@@ -29,6 +29,7 @@ BldcController bldcController(&angleProcessor, &currentProcessor, &modulationPro
 unsigned int print_cnt = 0;
 unsigned int mode_cnt = 0;
 unsigned int timer_1ms_cnt = 0;
+float process_time = 0;
 
 void app_interrupt_50us();
 
@@ -85,25 +86,32 @@ void app_main() {
     bldcController.setMode(BldcController::Mode::VoltageControl);
 
     while (1) {
-        // if (mode_cnt > 2000) {
-        //     mode_cnt = 0;
-        // } else if (mode_cnt > 1000) {
-        //     bldcController.setMode(BldcController::Mode::VoltageControl);
-        // } else {
-        //     bldcController.setMode(BldcController::Mode::Stop);
-        // }
-
-        // bldcController.setMode(BldcController::Mode::VoltageControl);
+        if (mode_cnt > 2000) {
+            mode_cnt = 0;
+        } else if (mode_cnt > 1000) {
+            bldcController.setVoltage(1, 0);
+        } else {
+            bldcController.setVoltage(-1, 0);
+        }
 
         if (print_cnt > 100) {
             // printf("e_a %f\n", angleProcessor.getElectricalAngle());
-            printf("encoder %ld\n", encoder.getTotalCnt());
+            // printf("encoder %ld\n", encoder.getTotalCnt());
+
+            // CurrentProcessor::PhaseCurrent_s current = currentProcessor.getPhaseCurrent();
+
+            // printf("uc: %f, vc: %f, wc: %f\n", current.u, current.v, current.w);
+
+            printf("u: %f, v: %f, w: %f\n", mcu.adcGetValue(MAL::P_ADC::U_Current), mcu.adcGetValue(MAL::P_ADC::V_Current), mcu.adcGetValue(MAL::P_ADC::W_Current));
+
+            // printf("cnt %f\n", process_time);
             print_cnt = 0;
         }
     }
 }
 
-void app_interrupt_50us() {
+void app_interrupt_50us() {  // 20kHz
+    mcu.timerSetCnt(MAL::P_TimerCnt::C1, 0);
     bldcController.update();
 
     if (timer_1ms_cnt > 20) {
@@ -112,4 +120,6 @@ void app_interrupt_50us() {
         timer_1ms_cnt = 0;
     }
     timer_1ms_cnt++;
+
+    process_time = float(mcu.timerGetCnt(MAL::P_TimerCnt::C1)) * 1 / 275000000 * 1000000;
 }

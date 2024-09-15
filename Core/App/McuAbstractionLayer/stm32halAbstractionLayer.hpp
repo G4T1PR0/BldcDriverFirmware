@@ -58,6 +58,10 @@ class stm32halAbstractionLayer : public baseMcuAbstractionLayer {
     virtual float cordicCos(float a);
     virtual void cordicSinCos(float a, float* s, float* c);
 
+    // Timer Counter
+    virtual void timerSetCnt(P_TimerCnt p, uint32_t cnt);
+    virtual uint32_t timerGetCnt(P_TimerCnt p);
+
    private:
     // ADC
     void _initADC();
@@ -83,6 +87,9 @@ class stm32halAbstractionLayer : public baseMcuAbstractionLayer {
     // Cordic
     int32_t RadiansToQ31(float x);
     float Q31ToRadians(int32_t x);
+
+    // Timer Counter
+    void _initTimerCounter();
 };
 
 #endif /* APP_DEVICES_STM32HALABSTRACTIONLAYER_STM32HALABSTRACTIONLAYER_HPP_ */

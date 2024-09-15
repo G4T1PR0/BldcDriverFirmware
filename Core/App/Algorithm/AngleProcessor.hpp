@@ -44,7 +44,7 @@ class AngleProcessor {
     }
 
     void setZero() {
-        // _zero_electrical_angle = _calcElectricalAngle();
+        _zero_electrical_angle = _calcElectricalAngle();
     }
 
    private:
