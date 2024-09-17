@@ -10,6 +10,7 @@
 #include <Algorithm/AngleProcessor.hpp>
 #include <Algorithm/CurrentProcessor.hpp>
 #include <Algorithm/ModulationProcessor.hpp>
+#include <Lib/pid.hpp>
 
 class BldcController {
    public:
@@ -31,6 +32,10 @@ class BldcController {
     };
 
     void init() {
+        _pid_current_q.setPID(0.0001, 0, 0);
+        _pid_current_d.setPID(0.001, 0, 0);
+
+        _pid_speed.setPID(0.0001, 0, 0);
     }
 
     void update() {
@@ -70,11 +75,18 @@ class BldcController {
                 break;
 
             case Mode::VoltageControl:
+                _voltage_q = _target_voltage_q;
+                _voltage_d = _target_voltage_d;
+
                 _modulationProcessor->setVoltage(_voltage_q, _voltage_d, _angleProcessor->getElectricalAngle());
                 break;
 
-            case Mode::CurrentControl:
-                break;
+            case Mode::CurrentControl: {
+                _voltage_q = _pid_current_q.update(_target_current_q, observed_current_q);
+                _voltage_d = _pid_current_d.update(_target_current_d, observed_current_d);
+
+                _modulationProcessor->setVoltage(3, 0, _angleProcessor->getElectricalAngle());
+            } break;
 
             default:
                 break;
@@ -95,15 +107,45 @@ class BldcController {
         return _mode;
     }
 
-    void setVoltage(float voltage_q, float voltage_d) {
-        _voltage_q = voltage_q;
-        _voltage_d = voltage_d;
+    void setTargetVoltage(float voltage_q, float voltage_d) {
+        _target_voltage_q = voltage_q;
+        _target_voltage_d = voltage_d;
+    }
+
+    void getTargetVoltage(float& voltage_q, float& voltage_d) {
+        voltage_q = _target_voltage_q;
+        voltage_d = _target_voltage_d;
+    }
+
+    void getApplyVoltage(float& voltage_q, float& voltage_d) {
+        voltage_q = _voltage_q;
+        voltage_d = _voltage_d;
+    }
+
+    void setTargetCurrent(float current_q, float current_d) {
+        _target_current_q = current_q;
+        _target_current_d = current_d;
+    }
+
+    void getTargetCurrent(float& current_q, float& current_d) {
+        current_q = _target_current_q;
+        current_d = _target_current_d;
+    }
+
+    void getObservedCurrentDQ(float& current_q, float& current_d) {
+        current_q = observed_current_q;
+        current_d = observed_current_d;
     }
 
    private:
     CurrentProcessor* _currentProcessor;
     AngleProcessor* _angleProcessor;
     ModulationProcessor* _modulationProcessor;
+
+    PID<float> _pid_current_q;
+    PID<float> _pid_current_d;
+
+    PID<float> _pid_speed;
 
     Mode _mode;
 
@@ -112,4 +154,15 @@ class BldcController {
 
     float _voltage_q = 0;
     float _voltage_d = 0;
+
+    float _target_voltage_q = 0;
+    float _target_voltage_d = 0;
+
+    float _target_current_q = 0;
+    float _target_current_d = 0;
+
+    float observed_current_q = 0;
+    float observed_current_d = 0;
+
+    float _target_speed = 0;
 };

@@ -112,17 +112,34 @@ void stm32halAbstractionLayer::_initADC(void) {
 }
 
 uint16_t stm32halAbstractionLayer::adcGetValue(P_ADC p) {
-    if (p != P_ADC::End_A) {
-        if (p == P_ADC::U_Current) {
+    switch (p) {
+        case P_ADC::U_Current:
             return HAL_ADCEx_InjectedGetValue(PAL.ADC_Ins[PAL.ADC_Connected[U_Current]], PAL.ADC_INJECTED_RANK[U_Current]);
-        }
-        if (p == P_ADC::V_Current) {
+
+        case P_ADC::V_Current:
             return HAL_ADCEx_InjectedGetValue(PAL.ADC_Ins[PAL.ADC_Connected[V_Current]], PAL.ADC_INJECTED_RANK[V_Current]);
-        }
-        if (p == P_ADC::W_Current) {
+
+        case P_ADC::W_Current:
             return HAL_ADCEx_InjectedGetValue(PAL.ADC_Ins[PAL.ADC_Connected[W_Current]], PAL.ADC_INJECTED_RANK[W_Current]);
-        }
+
+        default:
+            return 0;
     }
+
+    // switch (p) {
+    //     case P_ADC::U_Current:
+    //         return HAL_ADC_GetValue(PAL.ADC_Ins[PAL.ADC_Connected[U_Current]]);
+
+    //     case P_ADC::V_Current:
+    //         return HAL_ADC_GetValue(PAL.ADC_Ins[PAL.ADC_Connected[V_Current]]);
+
+    //     case P_ADC::W_Current:
+    //         return HAL_ADC_GetValue(PAL.ADC_Ins[PAL.ADC_Connected[W_Current]]);
+
+    //     default:
+    //         return 0;
+    // }
+
     return 0;
 }
 

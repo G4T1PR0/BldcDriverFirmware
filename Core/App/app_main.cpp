@@ -83,26 +83,46 @@ void app_main() {
 
     printf("\x1b[32m[Main Thread]\x1b[39m Calibration End\n");
 
-    bldcController.setMode(BldcController::Mode::VoltageControl);
+    bldcController.setMode(BldcController::Mode::CurrentControl);
+    bldcController.setTargetCurrent(1, 0);
 
     while (1) {
         if (mode_cnt > 2000) {
             mode_cnt = 0;
         } else if (mode_cnt > 1000) {
-            bldcController.setVoltage(1, 0);
+            bldcController.setTargetVoltage(3, 0);
         } else {
-            bldcController.setVoltage(-1, 0);
+            bldcController.setTargetVoltage(0, 0);
         }
 
         if (print_cnt > 100) {
-            // printf("e_a %f\n", angleProcessor.getElectricalAngle());
+            printf("e_a %f ", angleProcessor.getElectricalAngle());
+
+            float u, v, w;
+            modulationProcessor.getDuty(u, v, w);
+            printf("u: %f, v: %f, w: %f ", u, v, w);
+
             // printf("encoder %ld\n", encoder.getTotalCnt());
 
             // CurrentProcessor::PhaseCurrent_s current = currentProcessor.getPhaseCurrent();
 
-            // printf("uc: %f, vc: %f, wc: %f\n", current.u, current.v, current.w);
+            // printf("uc: %f, vc: %f, wc: %f ", current.u, current.v, current.w);
 
-            printf("u: %f, v: %f, w: %f\n", mcu.adcGetValue(MAL::P_ADC::U_Current), mcu.adcGetValue(MAL::P_ADC::V_Current), mcu.adcGetValue(MAL::P_ADC::W_Current));
+            // currentSensor.getCurrent(baseCurrentSensor::U_C);
+
+            // printf("uc: %f, vc: %f, wc: %f ", currentSensor.getCurrent(baseCurrentSensor::U_C), currentSensor.getCurrent(baseCurrentSensor::V_C), currentSensor.getCurrent(baseCurrentSensor::W_C));
+
+            // printf("a: %f b: %f ", currentProcessor.getAlphaBetaCurrent().alpha, currentProcessor.getAlphaBetaCurrent().beta);
+
+            float vd;
+            float vq;
+
+            bldcController.getApplyVoltage(vq, vd);
+
+            printf("vd: %f vq: %f ", vd, vq);
+            printf("od: %f oq: %f \n", currentProcessor.getDQCurrent().d, currentProcessor.getDQCurrent().q);
+
+            // printf(" u: %u, v: %u, w: %u\n", mcu.adcGetValue(MAL::P_ADC::U_Current), mcu.adcGetValue(MAL::P_ADC::V_Current), mcu.adcGetValue(MAL::P_ADC::W_Current));
 
             // printf("cnt %f\n", process_time);
             print_cnt = 0;

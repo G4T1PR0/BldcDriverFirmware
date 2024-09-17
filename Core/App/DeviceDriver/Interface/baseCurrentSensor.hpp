@@ -10,7 +10,7 @@
 class baseCurrentSensor {
    public:
     virtual void init(void) = 0;
-    void update(void);
+    virtual void update(void) = 0;
 
     enum Current_Sensor {
         U_C,

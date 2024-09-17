@@ -32,9 +32,9 @@ void CurrentSensorMCU::init(void) {
 }
 
 void CurrentSensorMCU::update(void) {
-    _current[U_C] = (_mcu->adcGetValue(_u) - _currentSensorOffset[U_C]) * _raw2voltage / _voltage2current;
-    _current[V_C] = (_mcu->adcGetValue(_v) - _currentSensorOffset[V_C]) * _raw2voltage / _voltage2current;
-    _current[W_C] = (_mcu->adcGetValue(_w) - _currentSensorOffset[W_C]) * _raw2voltage / _voltage2current;
+    _current[U_C] = (_mcu->adcGetValue(_u) - _currentSensorOffset[U_C]) * _raw2voltage16bit / _voltage2current;
+    _current[V_C] = (_mcu->adcGetValue(_v) - _currentSensorOffset[V_C]) * _raw2voltage16bit / _voltage2current;
+    _current[W_C] = (_mcu->adcGetValue(_w) - _currentSensorOffset[W_C]) * _raw2voltage12bit / _voltage2current;
 }
 
 float CurrentSensorMCU::getCurrent(Current_Sensor cs) {

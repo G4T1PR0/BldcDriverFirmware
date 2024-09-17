@@ -37,6 +37,8 @@ class CurrentProcessor {
     }
 
     void update(float electricalAngle) {
+        _currentSensor->update();
+
         _phase_current.u = _currentSensor->getCurrent(baseCurrentSensor::U_C);
         _phase_current.v = _currentSensor->getCurrent(baseCurrentSensor::V_C);
         _phase_current.w = _currentSensor->getCurrent(baseCurrentSensor::W_C);
@@ -53,7 +55,7 @@ class CurrentProcessor {
         return _alpha_beta_current;
     }
 
-    DQCurrent_s getDCurrent() {
+    DQCurrent_s getDQCurrent() {
         return _dq_current;
     }
 
@@ -80,14 +82,18 @@ class CurrentProcessor {
     }
 
     DQCurrent_s _parkTransform(AlphaBetaCurrent_s alphaBetaCurrent, float electricalAngle) {
-        float sin;
-        float cos;
-        _mcu->cordicSinCos(electricalAngle, &sin, &cos);
+        float sin_v;
+        float cos_v;
+
+        //_mcu->cordicSinCos(electricalAngle, &sin, &cos);
+
+        sin_v = sin(electricalAngle);
+        cos_v = cos(electricalAngle);
 
         DQCurrent_s dqCurrent;
 
-        dqCurrent.d = alphaBetaCurrent.alpha * cos + alphaBetaCurrent.beta * sin;
-        dqCurrent.q = alphaBetaCurrent.beta * cos - alphaBetaCurrent.alpha * sin;
+        dqCurrent.d = alphaBetaCurrent.alpha * cos_v + alphaBetaCurrent.beta * sin_v;
+        dqCurrent.q = alphaBetaCurrent.beta * cos_v - alphaBetaCurrent.alpha * sin_v;
 
         return dqCurrent;
     }

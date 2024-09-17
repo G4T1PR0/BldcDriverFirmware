@@ -55,11 +55,29 @@ class ModulationProcessor {
         Vb -= VVmin;
         Vc -= VVmin;
 
-        float u_pwm = Va / _voltage_limit;
-        float v_pwm = Vb / _voltage_limit;
-        float w_pwm = Vc / _voltage_limit;
+        _u_pwm = Va / _voltage_limit;
+        _v_pwm = Vb / _voltage_limit;
+        _w_pwm = Vc / _voltage_limit;
 
-        _driver->setPWM(u_pwm, v_pwm, w_pwm);
+        if (_u_pwm < 0) {
+            _u_pwm = 0;
+        } else if (_u_pwm >= 0.99) {
+            _u_pwm = 0.99;
+        }
+
+        if (_v_pwm < 0) {
+            _v_pwm = 0;
+        } else if (_v_pwm >= 0.99) {
+            _v_pwm = 0.99;
+        }
+
+        if (_w_pwm < 0) {
+            _w_pwm = 0;
+        } else if (_w_pwm >= 0.99) {
+            _w_pwm = 0.99;
+        }
+
+        _driver->setPWM(_u_pwm, _v_pwm, _w_pwm);
         _driver->update();
 
         // printf("U_PWM: %f, V_PWM: %f, W_PWM: %f\n", u_pwm, v_pwm, w_pwm);
@@ -75,6 +93,12 @@ class ModulationProcessor {
         _voltage_limit = voltage_limit;
     }
 
+    void getDuty(float& u, float& v, float& w) {
+        u = _u_pwm;
+        v = _v_pwm;
+        w = _w_pwm;
+    }
+
    private:
     baseMcuAbstractionLayer* _mcu;
     baseBLDCDriver* _driver;
@@ -83,7 +107,11 @@ class ModulationProcessor {
     float _voltage_d;
     float _electric_angle;
 
-    float _voltage_limit = 12;
+    float _voltage_limit = 18;
+
+    float _u_pwm;
+    float _v_pwm;
+    float _w_pwm;
 
     const float _sqrt3_2 = sqrt(3) / 2;
 
