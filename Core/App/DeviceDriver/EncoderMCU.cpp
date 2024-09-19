@@ -21,10 +21,6 @@ void EncoderMCU::init() {
 }
 
 void EncoderMCU::update() {
-    // _cnt = _mcu->encoderGetCnt(_encoder) - _offset;
-    // _mcu->encoderSetCnt(_encoder, _offset);
-    // _total_cnt += _cnt;
-
     _prev_cnt = _current_cnt;
     _current_cnt = _mcu->encoderGetCnt(_encoder);
 

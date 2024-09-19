@@ -31,7 +31,7 @@ unsigned int mode_cnt = 0;
 unsigned int timer_1ms_cnt = 0;
 float process_time = 0;
 
-void app_interrupt_50us();
+void app_interrupt_20us();
 
 void app_init() {
     mcu.init();
@@ -46,7 +46,7 @@ void app_init() {
 
     bldcController.init();
 
-    mcu.interruptSetCallback(MAL::P_Interrupt::T50us, app_interrupt_50us);
+    mcu.interruptSetCallback(MAL::P_Interrupt::T20us, app_interrupt_20us);
 
     mcu.waitMs(500);
     printf("\033[H");
@@ -91,10 +91,10 @@ void app_main() {
             mode_cnt = 0;
         } else if (mode_cnt > 1000) {
             // bldcController.setTargetVoltage(11, 0);
-            bldcController.setTargetCurrent(0.8, 0);
+            bldcController.setTargetCurrent(0.1, 0);
         } else {
             // bldcController.setTargetVoltage(0, 0);
-            bldcController.setTargetCurrent(-0.8, 0);
+            bldcController.setTargetCurrent(-0.1, 0);
         }
 
         if (print_cnt > 100) {
@@ -123,17 +123,17 @@ void app_main() {
             printf("vd: %f vq: %f ", vd, vq);
             printf("od: %f oq: %f ", currentProcessor.getDQCurrent().d, currentProcessor.getDQCurrent().q);
 
-            printf("cnt %f\n", process_time);
+            printf("p_time %f\n", process_time);
             print_cnt = 0;
         }
     }
 }
 
-void app_interrupt_50us() {  // 20kHz
+void app_interrupt_20us() {  // 50kHz
     mcu.timerSetCnt(MAL::P_TimerCnt::C1, 0);
     bldcController.update();
 
-    if (timer_1ms_cnt > 20) {
+    if (timer_1ms_cnt > 50) {
         print_cnt++;
         mode_cnt++;
         timer_1ms_cnt = 0;

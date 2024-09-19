@@ -83,7 +83,7 @@ stm32halAbstractionLayer::stm32halAbstractionLayer() {
     PAL.UART[MAL::P_UART::Debug] = &huart2;
 
     // Timer Interrupt
-    PAL.TimerInterrupt_TIM[MAL::P_Interrupt::T50us] = &htim7;
+    PAL.TimerInterrupt_TIM[MAL::P_Interrupt::T20us] = &htim7;
 
     // Timer Counter
     PAL.Cnt_Timer[MAL::P_TimerCnt::C1] = &htim6;
@@ -329,7 +329,7 @@ uint32_t stm32halAbstractionLayer::uartGetRxDataSize(P_UART p) {
 void (*stm32halAbstractionLayer::_timerInterruptCallback[P_Interrupt::End_T])(void);
 
 void stm32halAbstractionLayer::_initTimerInterrupt() {
-    HAL_TIM_Base_Start_IT(PAL.TimerInterrupt_TIM[MAL::P_Interrupt::T50us]);
+    HAL_TIM_Base_Start_IT(PAL.TimerInterrupt_TIM[MAL::P_Interrupt::T20us]);
 }
 
 void stm32halAbstractionLayer::interruptSetCallback(P_Interrupt p, void (*callback)(void)) {
@@ -339,9 +339,9 @@ void stm32halAbstractionLayer::interruptSetCallback(P_Interrupt p, void (*callba
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
-    if (htim == PAL.TimerInterrupt_TIM[MAL::P_Interrupt::T50us]) {
-        if (stm32halAbstractionLayer::_timerInterruptCallback[MAL::P_Interrupt::T50us] != NULL) {
-            stm32halAbstractionLayer::_timerInterruptCallback[MAL::P_Interrupt::T50us]();
+    if (htim == PAL.TimerInterrupt_TIM[MAL::P_Interrupt::T20us]) {
+        if (stm32halAbstractionLayer::_timerInterruptCallback[MAL::P_Interrupt::T20us] != NULL) {
+            stm32halAbstractionLayer::_timerInterruptCallback[MAL::P_Interrupt::T20us]();
         }
     }
 }

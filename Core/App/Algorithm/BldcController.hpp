@@ -53,7 +53,7 @@ class BldcController {
 
             case Mode::Calibration1: {
                 _modulationProcessor->setVoltage(5, 0, _calib_e_angle);
-                _calib_e_angle += 0.0005;
+                _calib_e_angle += 0.00025;
                 if (_calib_e_angle >= M_PI * 3 / 2) {
                     _modulationProcessor->setVoltage(5, 0, M_PI * 3 / 2);
                     _mode = Mode::Calibration2;

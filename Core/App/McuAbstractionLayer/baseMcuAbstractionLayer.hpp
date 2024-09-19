@@ -43,7 +43,7 @@ class baseMcuAbstractionLayer {
     };
 
     enum P_Interrupt {
-        T50us,
+        T20us,
         End_T
     };
 
