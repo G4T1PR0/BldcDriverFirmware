@@ -28,6 +28,18 @@ class ModulationProcessor {
 
         //_mcu->cordicSinCos(_electric_angle, &sin, &cos);
 
+        if (_voltage_d > _voltage_limit) {
+            _voltage_d = _voltage_limit;
+        } else if (_voltage_d < -_voltage_limit) {
+            _voltage_d = -_voltage_limit;
+        }
+
+        if (_voltage_q > _voltage_limit) {
+            _voltage_q = _voltage_limit;
+        } else if (_voltage_q < -_voltage_limit) {
+            _voltage_q = -_voltage_limit;
+        }
+
         sin = sinf(_electric_angle);
         cos = cosf(_electric_angle);
 

@@ -12,6 +12,8 @@
 #include <Algorithm/ModulationProcessor.hpp>
 #include <Lib/pid.hpp>
 
+#define LP_FILTER(value, sample, filter_constant) (value -= (filter_constant) * ((value) - (sample)))
+
 class BldcController {
    public:
     BldcController(AngleProcessor* angleProcessor, CurrentProcessor* currentProcessor, ModulationProcessor* modulationProcessor) {
@@ -32,8 +34,8 @@ class BldcController {
     };
 
     void init() {
-        _pid_current_q.setPID(0.0001, 0, 0);
-        _pid_current_d.setPID(0.001, 0, 0);
+        _pid_current_q.setPID(48, 0, 0);
+        _pid_current_d.setPID(10, 0, 0);
 
         _pid_speed.setPID(0.0001, 0, 0);
     }
@@ -41,6 +43,9 @@ class BldcController {
     void update() {
         _angleProcessor->update();
         _currentProcessor->update(_angleProcessor->getElectricalAngle());
+
+        LP_FILTER(observed_current_d, _currentProcessor->getDQCurrent().d, 0.05);
+        LP_FILTER(observed_current_q, _currentProcessor->getDQCurrent().q, 0.05);
 
         switch (_mode) {
             case Mode::UnInitilized:
@@ -85,7 +90,7 @@ class BldcController {
                 _voltage_q = _pid_current_q.update(_target_current_q, observed_current_q);
                 _voltage_d = _pid_current_d.update(_target_current_d, observed_current_d);
 
-                _modulationProcessor->setVoltage(3, 0, _angleProcessor->getElectricalAngle());
+                _modulationProcessor->setVoltage(_voltage_q, _voltage_d, _angleProcessor->getElectricalAngle());
             } break;
 
             default:
