@@ -30,22 +30,24 @@ class BldcController {
         Stop,
         VoltageControl,
         CurrentControl,
-        RUN,
+        VelocityControl,
     };
 
     void init() {
         _pid_current_q.setPID(48, 0, 0);
         _pid_current_d.setPID(10, 0, 0);
 
-        _pid_speed.setPID(0.0001, 0, 0);
+        _pid_velocity.setPID(0.01, 0, 0);
     }
 
     void update() {
         _angleProcessor->update();
         _currentProcessor->update(_angleProcessor->getElectricalAngle());
 
-        LP_FILTER(observed_current_d, _currentProcessor->getDQCurrent().d, 0.05);
-        LP_FILTER(observed_current_q, _currentProcessor->getDQCurrent().q, 0.05);
+        LP_FILTER(_observed_current_d, _currentProcessor->getDQCurrent().d, 0.05);
+        LP_FILTER(_observed_current_q, _currentProcessor->getDQCurrent().q, 0.05);
+
+        LP_FILTER(_observed_velocity, _angleProcessor->getVelocity(), 0.9);
 
         switch (_mode) {
             case Mode::UnInitilized:
@@ -87,8 +89,18 @@ class BldcController {
                 break;
 
             case Mode::CurrentControl: {
-                _voltage_q = _pid_current_q.update(_target_current_q, observed_current_q);
-                _voltage_d = _pid_current_d.update(_target_current_d, observed_current_d);
+                _voltage_q = _pid_current_q.update(_target_current_q, _observed_current_q);
+                _voltage_d = _pid_current_d.update(_target_current_d, _observed_current_d);
+
+                _modulationProcessor->setVoltage(_voltage_q, _voltage_d, _angleProcessor->getElectricalAngle());
+            } break;
+
+            case Mode::VelocityControl: {
+                _target_current_q = _pid_velocity.update(_target_velocity, _observed_velocity);
+                _target_current_d = 0;
+
+                _voltage_q = _pid_current_q.update(_target_current_q, _observed_current_q);
+                _voltage_d = _pid_current_d.update(_target_current_d, _observed_current_d);
 
                 _modulationProcessor->setVoltage(_voltage_q, _voltage_d, _angleProcessor->getElectricalAngle());
             } break;
@@ -138,8 +150,20 @@ class BldcController {
     }
 
     void getObservedCurrentDQ(float& current_q, float& current_d) {
-        current_q = observed_current_q;
-        current_d = observed_current_d;
+        current_q = _observed_current_q;
+        current_d = _observed_current_d;
+    }
+
+    void setTargetVelocity(float velocity) {
+        _target_velocity = velocity;
+    }
+
+    float getTargetVelocity() {
+        return _target_velocity;
+    }
+
+    float getObservedVelocity() {
+        return _observed_velocity;
     }
 
    private:
@@ -150,7 +174,7 @@ class BldcController {
     PID<float> _pid_current_q;
     PID<float> _pid_current_d;
 
-    PID<float> _pid_speed;
+    PID<float> _pid_velocity;
 
     Mode _mode;
 
@@ -166,8 +190,10 @@ class BldcController {
     float _target_current_q = 0;
     float _target_current_d = 0;
 
-    float observed_current_q = 0;
-    float observed_current_d = 0;
+    float _observed_current_q = 0;
+    float _observed_current_d = 0;
 
-    float _target_speed = 0;
+    float _target_velocity = 0;
+
+    volatile float _observed_velocity = 0;
 };

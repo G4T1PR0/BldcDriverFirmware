@@ -15,5 +15,6 @@ class baseEncoder {
     virtual int32_t getCnt() = 0;
     virtual int32_t getTotalCnt() = 0;
     virtual float getAngle() = 0;
+    virtual float getVelocity() = 0;
     virtual void setZero() = 0;
 };

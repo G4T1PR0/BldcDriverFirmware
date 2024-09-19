@@ -33,6 +33,11 @@ void EncoderMCU::update() {
     }
 }
 
+void EncoderMCU::update1kHz() {
+    _velocity = (float)(_total_cnt - _vel_prev_total_cnt) / _cpr * 2 * M_PI / 0.001;
+    _vel_prev_total_cnt = _total_cnt;
+}
+
 int32_t EncoderMCU::getCnt() {
     return _cnt;
 }
@@ -43,6 +48,10 @@ int32_t EncoderMCU::getTotalCnt() {
 
 float EncoderMCU::getAngle() {
     return (float)_total_cnt / _cpr * 2 * M_PI;
+}
+
+float EncoderMCU::getVelocity() {
+    return _velocity;
 }
 
 void EncoderMCU::setCpr(uint16_t cpr) {

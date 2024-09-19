@@ -25,6 +25,7 @@ class AngleProcessor {
         _encoder->update();
         _mechanicalAngle = _encoder->getAngle();
         _electricalAngle = _calcElectricalAngle();
+        _velocity = _encoder->getVelocity();
     }
 
     float getMechanicalAngle() {
@@ -33,6 +34,10 @@ class AngleProcessor {
 
     float getElectricalAngle() {
         return _electricalAngle;
+    }
+
+    float getVelocity() {
+        return _velocity;
     }
 
     void setPolePairs(uint16_t polePairs) {
@@ -56,6 +61,9 @@ class AngleProcessor {
     float _mechanicalAngle = 0;
     float _electricalAngle = 0;
     float _zero_electrical_angle = 0;
+
+    float _prev_mechanicalAngle = 0;
+    float _velocity = 0;
 
     float _calcElectricalAngle() {
         if (_direction) {

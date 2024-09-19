@@ -16,9 +16,11 @@ class EncoderMCU : public baseEncoder {
     EncoderMCU(MAL* mcu, MAL::P_Encoder encoder);
     void init();
     void update();
+    void update1kHz();
     int32_t getCnt();
     int32_t getTotalCnt();
     float getAngle();
+    float getVelocity();
     void setCpr(uint16_t cpr);
     void setZero();
 
@@ -34,4 +36,7 @@ class EncoderMCU : public baseEncoder {
 
     int32_t _current_cnt = 0;
     int32_t _prev_cnt = 0;
+
+    int32_t _vel_prev_total_cnt = 0;
+    float _velocity = 0;
 };
