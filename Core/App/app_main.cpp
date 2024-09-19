@@ -110,7 +110,7 @@ void app_main() {
 
             // currentSensor.getCurrent(baseCurrentSensor::U_C);
 
-            // printf("uc: %f, vc: %f, wc: %f ", currentSensor.getCurrent(baseCurrentSensor::U_C), currentSensor.getCurrent(baseCurrentSensor::V_C), currentSensor.getCurrent(baseCurrentSensor::W_C));
+            printf("uc: %f, vc: %f, wc: %f ", currentSensor.getCurrent(baseCurrentSensor::U_C), currentSensor.getCurrent(baseCurrentSensor::V_C), currentSensor.getCurrent(baseCurrentSensor::W_C));
 
             // printf("a: %f b: %f ", currentProcessor.getAlphaBetaCurrent().alpha, currentProcessor.getAlphaBetaCurrent().beta);
 

@@ -28,13 +28,8 @@ class ModulationProcessor {
 
         //_mcu->cordicSinCos(_electric_angle, &sin, &cos);
 
-        float angle_el = _normalizeAngle(_electric_angle + M_PI / 2);
-
-        sin = sinf(angle_el);
-        cos = cosf(angle_el);
-
-        // sin = sinf(_electric_angle);
-        // cos = cosf(_electric_angle);
+        sin = sinf(_electric_angle);
+        cos = cosf(_electric_angle);
 
         float alpha = cos * _voltage_d - sin * _voltage_q;
         float beta = sin * _voltage_d + cos * _voltage_q;
