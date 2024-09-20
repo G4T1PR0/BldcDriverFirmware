@@ -37,7 +37,7 @@ class BldcController {
         _pid_current_q.setPID(48, 0, 0);
         _pid_current_d.setPID(10, 0, 0);
 
-        _pid_velocity.setPID(0.01, 0, 0);
+        _pid_velocity.setPID(0.001, 0.00001, 0);
     }
 
     void update() {
@@ -47,7 +47,7 @@ class BldcController {
         LP_FILTER(_observed_current_d, _currentProcessor->getDQCurrent().d, 0.05);
         LP_FILTER(_observed_current_q, _currentProcessor->getDQCurrent().q, 0.05);
 
-        LP_FILTER(_observed_velocity, _angleProcessor->getVelocity(), 0.9);
+        LP_FILTER(_observed_velocity, _angleProcessor->getVelocity(), 0.1);
 
         switch (_mode) {
             case Mode::UnInitilized:

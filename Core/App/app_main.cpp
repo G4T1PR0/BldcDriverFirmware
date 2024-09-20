@@ -90,7 +90,7 @@ void app_main() {
         if (mode_cnt > 2000) {
             mode_cnt = 0;
         } else if (mode_cnt > 1500) {
-            bldcController.setTargetVelocity(-100);
+            bldcController.setTargetVelocity(-300);
         } else if (mode_cnt > 1000) {
             bldcController.setTargetVelocity(-30);
         } else if (mode_cnt > 500) {
@@ -100,7 +100,7 @@ void app_main() {
         } else {
             // bldcController.setTargetVoltage(3, 0);
             // bldcController.setTargetCurrent(3, 0);
-            bldcController.setTargetVelocity(100);
+            bldcController.setTargetVelocity(300);
         }
 
         if (print_cnt > 100) {
