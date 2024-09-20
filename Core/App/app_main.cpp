@@ -90,7 +90,7 @@ void app_main() {
         if (mode_cnt > 2000) {
             mode_cnt = 0;
         } else if (mode_cnt > 1500) {
-            bldcController.setTargetVelocity(-800);
+            bldcController.setTargetVelocity(-100);
         } else if (mode_cnt > 1000) {
             bldcController.setTargetVelocity(-30);
         } else if (mode_cnt > 500) {
@@ -100,22 +100,22 @@ void app_main() {
         } else {
             // bldcController.setTargetVoltage(3, 0);
             // bldcController.setTargetCurrent(3, 0);
-            bldcController.setTargetVelocity(800);
+            bldcController.setTargetVelocity(100);
         }
 
         if (print_cnt > 100) {
-            printf("e_cnt %8ld ", encoder.getTotalCnt());
-            printf("t_v %5.2f ", bldcController.getTargetVelocity());
-            printf("o_v %5.2f ", bldcController.getObservedVelocity());
-            printf("p_time %4.2fus\n", process_time);
+            // printf("e_cnt %8ld ", encoder.getTotalCnt());
+            // printf("t_v %5.2f ", bldcController.getTargetVelocity());
+            // printf("o_v %5.2f ", bldcController.getObservedVelocity());
+            // printf("p_time %4.2fus\n", process_time);
 
             ////
 
-            // printf("encoder %ld ", encoder.getTotalCnt());
-            // printf("e_a %f ", angleProcessor.getElectricalAngle());
-            // printf("m_a %f ", angleProcessor.getMechanicalAngle());
-            // printf("v1 %f ", encoder.getVelocity());
-            // printf("v2 %f ", bldcController.getObservedVelocity());
+            printf("encoder %ld ", encoder.getTotalCnt());
+            printf("e_a %f ", angleProcessor.getElectricalAngle());
+            printf("m_a %f ", angleProcessor.getMechanicalAngle());
+            printf("v1 %f ", encoder.getVelocity());
+            printf("v2 %f ", bldcController.getObservedVelocity());
 
             // float u, v, w;
             // modulationProcessor.getDuty(u, v, w);
@@ -144,7 +144,7 @@ void app_main() {
             // printf("vd: %f vq: %f ", vd, vq);
             // printf("od: %f oq: %f ", currentProcessor.getDQCurrent().d, currentProcessor.getDQCurrent().q);
 
-            // printf("p_time %f\n", process_time);
+            printf("p_time %f\n", process_time);
 
             print_cnt = 0;
         }
