@@ -31,21 +31,22 @@ class BldcController {
         VoltageControl,
         CurrentControl,
         VelocityControl,
+        Beep,
     };
 
     void init() {
         _pid_current_q.setPID(48, 0, 0);
-        _pid_current_d.setPID(10, 0, 0);
+        _pid_current_d.setPID(48, 0, 0);
 
-        _pid_velocity.setPID(0.001, 0.00001, 0);
+        _pid_velocity.setPID(0.015, 0.000005, 0);
     }
 
     void update() {
         _angleProcessor->update();
         _currentProcessor->update(_angleProcessor->getElectricalAngle());
 
-        LP_FILTER(_observed_current_d, _currentProcessor->getDQCurrent().d, 0.05);
-        LP_FILTER(_observed_current_q, _currentProcessor->getDQCurrent().q, 0.05);
+        LP_FILTER(_observed_current_d, _currentProcessor->getDQCurrent().d, 0.01);
+        LP_FILTER(_observed_current_q, _currentProcessor->getDQCurrent().q, 0.01);
 
         LP_FILTER(_observed_velocity, _angleProcessor->getVelocity(), 0.1);
 
@@ -55,7 +56,7 @@ class BldcController {
 
             case Mode::Calibration1: {
                 _modulationProcessor->setVoltage(5, 0, _calib_e_angle);
-                _calib_e_angle += 0.00025;
+                _calib_e_angle += 0.00005;
                 if (_calib_e_angle >= M_PI * 3 / 2) {
                     _modulationProcessor->setVoltage(5, 0, M_PI * 3 / 2);
                     _mode = Mode::Calibration2;
@@ -66,7 +67,7 @@ class BldcController {
                 _modulationProcessor->setVoltage(5, 0, M_PI * 3 / 2);
 
                 calib_cnt++;
-                if (calib_cnt > 700 * 20) {
+                if (calib_cnt > 1500 * 50) {
                     _mode = Mode::Calibration3;
                 }
                 break;
@@ -78,7 +79,7 @@ class BldcController {
                 break;
 
             case Mode::Stop:
-                _modulationProcessor->setVoltage(0, 0, 0);
+                _modulationProcessor->setVoltage(0, 0, _angleProcessor->getElectricalAngle());
                 break;
 
             case Mode::VoltageControl:
@@ -104,6 +105,34 @@ class BldcController {
 
                 _modulationProcessor->setVoltage(_voltage_q, _voltage_d, _angleProcessor->getElectricalAngle());
             } break;
+
+            case Mode::Beep:
+                _beep_cnt_e++;
+                _beep_cnt_c++;
+                if (_beep_cnt_e > _beep_time) {
+                    _modulationProcessor->setVoltage(0, 0, _angleProcessor->getElectricalAngle());
+                    // _beep_cnt = 0;
+                    _mode = Mode::Stop;
+                } else {
+                    if (_beep_cnt_c > (50 / _beep_freq * 1000)) {
+                        _beep_cnt_c = 0;
+                    } else if (_beep_cnt_c > (50 / _beep_freq * 1000) * 0.5) {
+                        _voltage_q = _pid_current_q.update(_beep_current, _observed_current_q);
+                    } else {
+                        _voltage_q = _pid_current_q.update(0, _observed_current_q);
+                    }
+
+                    _voltage_d = _pid_current_d.update(0, _observed_current_d);
+
+                    if (_voltage_q > 4) {
+                        _voltage_q = 4;
+                    } else if (_voltage_q < -4) {
+                        _voltage_q = -4;
+                    }
+
+                    _modulationProcessor->setVoltage(_voltage_q, _voltage_d, _angleProcessor->getElectricalAngle());
+                }
+                break;
 
             default:
                 break;
@@ -166,6 +195,15 @@ class BldcController {
         return _observed_velocity;
     }
 
+    void beep(float freq, float current, float time) {
+        _beep_freq = freq;
+        _beep_current = current;
+        _beep_time = time * 50;
+        _beep_cnt_c = 0;
+        _beep_cnt_e = 0;
+        _mode = Mode::Beep;
+    }
+
    private:
     CurrentProcessor* _currentProcessor;
     AngleProcessor* _angleProcessor;
@@ -178,7 +216,7 @@ class BldcController {
 
     Mode _mode;
 
-    float _calib_e_angle = 0;
+    float _calib_e_angle = -M_PI * 3 / 2;
     unsigned int calib_cnt = 0;
 
     float _voltage_q = 0;
@@ -196,4 +234,10 @@ class BldcController {
     float _target_velocity = 0;
 
     volatile float _observed_velocity = 0;
+
+    unsigned int _beep_cnt_c = 0;
+    unsigned int _beep_cnt_e = 0;
+    float _beep_freq = 0;
+    float _beep_current = 0;
+    float _beep_time = 0;
 };

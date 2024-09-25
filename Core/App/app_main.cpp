@@ -29,7 +29,6 @@ BldcController bldcController(&angleProcessor, &currentProcessor, &modulationPro
 unsigned int print_cnt = 0;
 unsigned int mode_cnt = 0;
 unsigned int timer_1ms_cnt = 0;
-unsigned int timer_100us_cnt = 0;
 float process_time = 0;
 
 void app_interrupt_20us();
@@ -84,24 +83,57 @@ void app_main() {
 
     printf("\x1b[32m[Main Thread]\x1b[39m Calibration End\n");
 
-    bldcController.setMode(BldcController::Mode::VelocityControl);
+    mcu.waitMs(1000);
+    bldcController.beep(1045, 0.07, 1000);
+    mcu.waitMs(1200);
+    bldcController.beep(2060, 0.07, 50);
+    mcu.waitMs(100);
+    bldcController.beep(1045, 0.07, 50);
+    mcu.waitMs(1000);
+
+    // bldcController.setMode(BldcController::Mode::VoltageControl);
+    bldcController.setMode(BldcController::Mode::CurrentControl);
+    // bldcController.setMode(BldcController::Mode::VelocityControl);
+
+    // bldcController.setTargetCurrent(0, 0);
+    // bldcController.setTargetVelocity(0);
+
+    bool dir = false;
 
     while (1) {
-        if (mode_cnt > 2000) {
-            mode_cnt = 0;
-        } else if (mode_cnt > 1500) {
-            bldcController.setTargetVelocity(-300);
-        } else if (mode_cnt > 1000) {
-            bldcController.setTargetVelocity(-30);
-        } else if (mode_cnt > 500) {
-            // bldcController.setTargetVoltage(11, 0);
-            // bldcController.setTargetCurrent(0.2, 0);
-            bldcController.setTargetVelocity(30);
+        // if (mode_cnt > 10000) {
+        //     mode_cnt = 0;
+        // } else if (mode_cnt > 5100) {
+        //     // bldcController.setTargetVoltage(-5, 0);
+        //     // bldcController.setTargetCurrent(-0.11, 0);
+        //     bldcController.setTargetVelocity(60);
+        // } else if (mode_cnt > 5000) {
+        //     // bldcController.setTargetVoltage(-5, 0);
+        //     // bldcController.setTargetCurrent(-0.11, 0);
+        //     bldcController.setTargetVelocity(60);
+        // } else if (mode_cnt > 100) {
+        //     // bldcController.setTargetVoltage(5, 0);
+        //     // bldcController.setTargetCurrent(0.11, 0);
+        //     bldcController.setTargetVelocity(6.28);
+        // } else {
+        //     // bldcController.setTargetVoltage(5, 0);
+        //     // bldcController.setTargetCurrent(0.11, 0);
+        //     bldcController.setTargetVelocity(6.28);
+        // }
+
+        if (dir) {
+            bldcController.setTargetCurrent(0.4, 0);
+            if (bldcController.getObservedVelocity() > 350) {
+                dir = false;
+            }
         } else {
-            // bldcController.setTargetVoltage(3, 0);
-            // bldcController.setTargetCurrent(3, 0);
-            bldcController.setTargetVelocity(300);
+            bldcController.setTargetCurrent(-0.4, 0);
+            if (bldcController.getObservedVelocity() < -350) {
+                dir = true;
+            }
         }
+
+        // bldcController.setTargetCurrent(0.7, 0);
 
         if (print_cnt > 100) {
             // printf("e_cnt %8ld ", encoder.getTotalCnt());
@@ -111,23 +143,20 @@ void app_main() {
 
             ////
 
-            printf("encoder %ld ", encoder.getTotalCnt());
-            printf("e_a %f ", angleProcessor.getElectricalAngle());
-            printf("m_a %f ", angleProcessor.getMechanicalAngle());
-            printf("v1 %f ", encoder.getVelocity());
-            printf("v2 %f ", bldcController.getObservedVelocity());
+            // printf("encoder %ld ", encoder.getTotalCnt());
+            // printf("e_a %f ", angleProcessor.getElectricalAngle());
+            // printf("m_a %f ", angleProcessor.getMechanicalAngle());
+            // printf("v1 %f ", encoder.getVelocity());
+            printf("rad/s %.2f ", bldcController.getObservedVelocity());
+            printf("rpm %.2f ", bldcController.getObservedVelocity() * 60 / (2 * M_PI));
 
             // float u, v, w;
             // modulationProcessor.getDuty(u, v, w);
-            // printf("u: %f, v: %f, w: %f ", u, v, w);
+            // printf("u: %.2f, v: %.2f, w: %.2f ", u, v, w);
 
             // CurrentProcessor::PhaseCurrent_s current = currentProcessor.getPhaseCurrent();
 
-            // printf("uc: %f, vc: %f, wc: %f ", current.u, current.v, current.w);
-
-            // currentSensor.getCurrent(baseCurrentSensor::U_C);
-
-            // printf("uc: %f, vc: %f, wc: %f ", currentSensor.getCurrent(baseCurrentSensor::U_C), currentSensor.getCurrent(baseCurrentSensor::V_C), currentSensor.getCurrent(baseCurrentSensor::W_C));
+            // printf("uc: %.2f, vc: %.2f, wc: %.2f ", current.u, current.v, current.w);
 
             // printf("a: %f b: %f ", currentProcessor.getAlphaBetaCurrent().alpha, currentProcessor.getAlphaBetaCurrent().beta);
 
@@ -135,16 +164,16 @@ void app_main() {
 
             // bldcController.getTargetCurrent(t_qc, t_dc);
 
-            // printf("t_qc: %f t_dc: %f ", t_qc, t_dc);
+            // printf("t_qc: %.2f t_dc: %.2f ", t_qc, t_dc);
             // float vd;
             // float vq;
 
             // bldcController.getApplyVoltage(vq, vd);
 
-            // printf("vd: %f vq: %f ", vd, vq);
-            // printf("od: %f oq: %f ", currentProcessor.getDQCurrent().d, currentProcessor.getDQCurrent().q);
+            // printf("vd: %.2f vq: %.2f ", vd, vq);
+            printf("od: %.2f oq: %.2f ", currentProcessor.getDQCurrent().d, currentProcessor.getDQCurrent().q);
 
-            printf("p_time %f\n", process_time);
+            printf("p_time %.2f\n", process_time);
 
             print_cnt = 0;
         }
@@ -154,12 +183,6 @@ void app_main() {
 void app_interrupt_20us() {  // 50kHz
     mcu.timerSetCnt(MAL::P_TimerCnt::C1, 0);
     bldcController.update();
-
-    timer_100us_cnt++;
-    if (timer_100us_cnt >= 5) {  // 10kHz
-
-        timer_100us_cnt = 0;
-    }
 
     timer_1ms_cnt++;
     if (timer_1ms_cnt >= 50) {  // 1kHz
