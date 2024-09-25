@@ -83,12 +83,12 @@ void app_main() {
 
     printf("\x1b[32m[Main Thread]\x1b[39m Calibration End\n");
 
-    mcu.waitMs(1000);
-    bldcController.beep(1045, 0.07, 1000);
-    mcu.waitMs(1200);
-    bldcController.beep(2060, 0.07, 50);
-    mcu.waitMs(100);
-    bldcController.beep(1045, 0.07, 50);
+    mcu.waitMs(300);
+    bldcController.beep(2045, 0.08, 250);
+    mcu.waitMs(400);
+    bldcController.beep(3500, 0.08, 100);
+    mcu.waitMs(150);
+    bldcController.beep(3500, 0.08, 100);
     mcu.waitMs(1000);
 
     // bldcController.setMode(BldcController::Mode::VoltageControl);
