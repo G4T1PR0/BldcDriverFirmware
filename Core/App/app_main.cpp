@@ -74,6 +74,10 @@ void app_main() {
 
     mcu.gpioSetValue(MAL::P_GPIO::Driver_Power_Switch, true);
 
+    mcu.waitMs(500);
+    bldcController.beep(2045, 0.09, 350);
+    mcu.waitMs(500);
+
     printf("\x1b[32m[Main Thread]\x1b[39m Calibration Start\n");
 
     bldcController.setMode(BldcController::Mode::Calibration1);

@@ -94,6 +94,9 @@ class baseMcuAbstractionLayer {
     // Timer Counter
     virtual void timerSetCnt(P_TimerCnt p, uint32_t cnt) = 0;
     virtual uint32_t timerGetCnt(P_TimerCnt p) = 0;
+
+    // Bootloader
+    virtual void enterBootloader(void) = 0;
 };
 
 typedef baseMcuAbstractionLayer MAL;

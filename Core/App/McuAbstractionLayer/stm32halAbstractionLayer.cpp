@@ -99,7 +99,7 @@ void stm32halAbstractionLayer::init() {
 }
 
 // ADC
-uint16_t stm32halAbstractionLayer::_data[PAL.STM_ADC::ADC_END][3 * ADC_BUFFER_SIZE] = {0};
+uint16_t stm32halAbstractionLayer::_data[PAL.STM_ADC::ADC_END][3 * STM32_MAL_ADC_BUFFER_SIZE] = {0};
 
 void stm32halAbstractionLayer::_initADC(void) {
     HAL_ADC_Start(PAL.ADC_Ins[PeripheralAllocation::STM_ADC::ADC_1]);
@@ -263,19 +263,19 @@ bool stm32halAbstractionLayer::gpioGetValue(P_GPIO p) {
 
 // UART
 
-RingBuffer<uint8_t, UART_BUFFER_SIZE> stm32halAbstractionLayer::_uartRxBuffer[P_UART::End_U];
+RingBuffer<uint8_t, STM32_MAL_UART_BUFFER_SIZE> stm32halAbstractionLayer::_uartRxBuffer[P_UART::End_U];
 
 void stm32halAbstractionLayer::_initUART() {
-    while (HAL_UART_Receive_DMA(PAL.UART[MAL::P_UART::Controller], _uartRxBuffer[MAL::P_UART::Controller].Buffer, UART_BUFFER_SIZE) != HAL_OK) {
+    while (HAL_UART_Receive_DMA(PAL.UART[MAL::P_UART::Controller], _uartRxBuffer[MAL::P_UART::Controller].Buffer, STM32_MAL_UART_BUFFER_SIZE) != HAL_OK) {
     }
 
-    while (HAL_UART_Receive_DMA(PAL.UART[MAL::P_UART::Debug], _uartRxBuffer[MAL::P_UART::Debug].Buffer, UART_BUFFER_SIZE) != HAL_OK) {
+    while (HAL_UART_Receive_DMA(PAL.UART[MAL::P_UART::Debug], _uartRxBuffer[MAL::P_UART::Debug].Buffer, STM32_MAL_UART_BUFFER_SIZE) != HAL_OK) {
     }
 }
 
 uint32_t stm32halAbstractionLayer::_uartGetRxBufferDmaWriteAddress(P_UART p) {
     if (p != P_UART::End_U) {
-        return (UART_BUFFER_SIZE - __HAL_DMA_GET_COUNTER(PAL.UART[p]->hdmarx)) % UART_BUFFER_SIZE;
+        return (STM32_MAL_UART_BUFFER_SIZE - __HAL_DMA_GET_COUNTER(PAL.UART[p]->hdmarx)) % STM32_MAL_UART_BUFFER_SIZE;
     }
     return 0;
 }
@@ -311,7 +311,7 @@ void stm32halAbstractionLayer::uartReadViaBuffer(P_UART p, uint8_t* data, uint32
 
     if (HAL_UART_GetState(PAL.UART[p]) == HAL_UART_STATE_READY) {
         HAL_UART_DMAStop(PAL.UART[p]);
-        HAL_UART_Receive_DMA(PAL.UART[p], _uartRxBuffer[p].Buffer, UART_BUFFER_SIZE);
+        HAL_UART_Receive_DMA(PAL.UART[p], _uartRxBuffer[p].Buffer, STM32_MAL_UART_BUFFER_SIZE);
     }
 }
 
@@ -421,4 +421,96 @@ uint32_t stm32halAbstractionLayer::timerGetCnt(P_TimerCnt p) {
         return __HAL_TIM_GET_COUNTER(PAL.Cnt_Timer[p]);
     }
     return 0;
+}
+
+// Bootloader
+void stm32halAbstractionLayer::enterBootloader(void) {
+    void (*SysMemBootJump)(void);
+
+    /* Set a vector addressed with STM32 Microcontrollers names */
+    /* Each vector position contains an address to the boot loader entry point */
+
+    volatile uint32_t BootAddr[33];
+
+    BootAddr[C0] = 0x1FFF0000;
+    BootAddr[F030x8] = 0x1FFFEC00;
+    BootAddr[F030xC] = 0x1FFFD800;
+    BootAddr[F03xx] = 0x1FFFEC00;
+    BootAddr[F05] = 0x1FFFEC00;
+    BootAddr[F07] = 0x1FFFC800;
+    BootAddr[F09] = 0x1FFFD800;
+    BootAddr[F10xx] = 0x1FFFF000;
+    BootAddr[F105] = 0x1FFFB000;
+    BootAddr[F107] = 0x1FFFB000;
+    BootAddr[F10XL] = 0x1FFFE000;
+    BootAddr[F2] = 0x1FFF0000;
+    BootAddr[F3] = 0x1FFFD800;
+    BootAddr[F4] = 0x1FFF0000;
+    BootAddr[F7] = 0x1FF00000;
+    BootAddr[G0] = 0x1FFF0000;
+    BootAddr[G4] = 0x1FFF0000;
+    BootAddr[H503] = 0x0BF87000;
+    BootAddr[H563] = 0x0BF97000;
+    BootAddr[H573] = 0x0BF97000;
+    BootAddr[H7x] = 0x1FF09800;
+    BootAddr[H7A] = 0x1FF0A800;
+    BootAddr[H7B] = 0x1FF0A000;
+    BootAddr[L0] = 0x1FF00000;
+    BootAddr[L1] = 0x1FF00000;
+    BootAddr[L4] = 0x1FFF0000;
+    BootAddr[L5] = 0x0BF90000;
+    BootAddr[WBA] = 0x0BF88000;
+    BootAddr[WBX] = 0x1FFF0000;
+    BootAddr[WL] = 0x1FFF0000;
+    BootAddr[U5] = 0x0BF90000;
+
+    /* Disable all interrupts */
+    __disable_irq();
+
+    /* Deinit */
+    HAL_RCC_DeInit();
+    HAL_DeInit();
+
+    SCB_DisableICache();
+    SCB_DisableDCache();
+
+    /* Disable Systick timer */
+    SysTick->CTRL = 0;
+    SysTick->LOAD = 0;
+    SysTick->VAL = 0;
+
+    /* Clear Interrupt Enable Register & Interrupt Pending Register */
+    unsigned int nvic_num = (sizeof(NVIC->ICER) / sizeof(*NVIC->ICER));
+    for (unsigned int i = 0; i < nvic_num; i++) {
+        NVIC->ICER[i] = 0xFFFFFFFF;
+        NVIC->ICPR[i] = 0xFFFFFFFF;
+    }
+
+    /* Re-enable all interrupts */
+    __enable_irq();
+
+#if defined(STM32F4)
+    SYSCFG->MEMRMP = 0x01;
+#endif
+
+#if defined(STM32F0)
+    SYSCFG->CFGR1 = 0x01;
+#endif
+
+    /* Set up the jump to boot loader address + 4 */
+    SysMemBootJump = (void (*)(void))(*((uint32_t*)((BootAddr[_model] + 4))));
+
+    /* Set the main stack pointer to the boot loader stack */
+    __set_MSP(*(uint32_t*)BootAddr[_model]);
+
+    __DSB();  // Ensure the VTOR and SP operations are complete
+    __ISB();  // Flush the pipeline because of SP change
+
+    /* Call the function to jump to boot loader location */
+    SysMemBootJump();
+
+    /* Jump is done successfully */
+    while (1) {
+        /* Code should never reach this loop */
+    }
 }

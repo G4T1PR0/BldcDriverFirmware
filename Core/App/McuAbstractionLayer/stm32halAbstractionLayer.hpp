@@ -11,8 +11,9 @@
 #include <McuAbstractionLayer/RingBuffer.hpp>
 #include <McuAbstractionLayer/baseMcuAbstractionLayer.hpp>
 
-#define UART_BUFFER_SIZE 512
-#define ADC_BUFFER_SIZE 50
+#define STM32_MAL_UART_BUFFER_SIZE 512
+#define STM32_MAL_ADC_BUFFER_SIZE 50
+#define STM32_MAL_MCU_MODEL_NUMBER H7x
 
 class stm32halAbstractionLayer : public baseMcuAbstractionLayer {
    public:
@@ -62,11 +63,14 @@ class stm32halAbstractionLayer : public baseMcuAbstractionLayer {
     virtual void timerSetCnt(P_TimerCnt p, uint32_t cnt);
     virtual uint32_t timerGetCnt(P_TimerCnt p);
 
+    // Bootloader
+    virtual void enterBootloader(void);
+
    private:
     // ADC
     void _initADC();
 
-    static uint16_t _data[3][3 * ADC_BUFFER_SIZE];
+    static uint16_t _data[3][3 * STM32_MAL_ADC_BUFFER_SIZE];
 
     // Timer PWM
     void _initPWM();
@@ -78,7 +82,7 @@ class stm32halAbstractionLayer : public baseMcuAbstractionLayer {
     // UART
     void _initUART();
     uint32_t _uartGetRxBufferDmaWriteAddress(P_UART p);
-    static RingBuffer<uint8_t, UART_BUFFER_SIZE> _uartRxBuffer[P_UART::End_U];
+    static RingBuffer<uint8_t, STM32_MAL_UART_BUFFER_SIZE> _uartRxBuffer[P_UART::End_U];
     uint32_t _uartRxBufferReadAddress[P_UART::End_U] = {0};
 
     // Interrupt
@@ -90,6 +94,41 @@ class stm32halAbstractionLayer : public baseMcuAbstractionLayer {
 
     // Timer Counter
     void _initTimerCounter();
+
+    // Bootloader
+    enum Model { C0,
+                 F030x8,
+                 F030xC,
+                 F03xx,
+                 F05,
+                 F07,
+                 F09,
+                 F10xx,
+                 F105,
+                 F107,
+                 F10XL,
+                 F2,
+                 F3,
+                 F4,
+                 F7,
+                 G0,
+                 G4,
+                 H503,
+                 H563,
+                 H573,
+                 H7x,
+                 H7A,
+                 H7B,
+                 L0,
+                 L1,
+                 L4,
+                 L5,
+                 WBA,
+                 WBX,
+                 WL,
+                 U5 };
+
+    Model _model = Model::STM32_MAL_MCU_MODEL_NUMBER;
 };
 
 #endif /* APP_DEVICES_STM32HALABSTRACTIONLAYER_STM32HALABSTRACTIONLAYER_HPP_ */
