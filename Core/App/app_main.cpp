@@ -106,25 +106,25 @@ void app_main() {
     bool dir = false;
 
     while (1) {
-        // if (mode_cnt > 2000) {
-        //     mode_cnt = 0;
-        // } else if (mode_cnt > 1100) {
-        //     // bldcController.setTargetVoltage(-5, 0);
-        //     bldcController.setTargetCurrent(-0.4, 0);
-        //     // bldcController.setTargetVelocity(300);
-        // } else if (mode_cnt > 1000) {
-        //     // bldcController.setTargetVoltage(-5, 0);
-        //     bldcController.setTargetCurrent(-0.4, 0);
-        //     // bldcController.setTargetVelocity(300);
-        // } else if (mode_cnt > 100) {
-        //     // bldcController.setTargetVoltage(5, 0);
-        //     bldcController.setTargetCurrent(0.4, 0);
-        //     // bldcController.setTargetVelocity(-300);
-        // } else {
-        //     // bldcController.setTargetVoltage(5, 0);
-        //     bldcController.setTargetCurrent(0.4, 0);
-        //     // bldcController.setTargetVelocity(-300);
-        // }
+        if (mode_cnt > 2000) {
+            mode_cnt = 0;
+        } else if (mode_cnt > 1100) {
+            // bldcController.setTargetVoltage(-5, 0);
+            bldcController.setTargetCurrent(-0.4, 0);
+            // bldcController.setTargetVelocity(300);
+        } else if (mode_cnt > 1000) {
+            // bldcController.setTargetVoltage(-5, 0);
+            bldcController.setTargetCurrent(-0.4, 0);
+            // bldcController.setTargetVelocity(300);
+        } else if (mode_cnt > 100) {
+            // bldcController.setTargetVoltage(5, 0);
+            bldcController.setTargetCurrent(0.4, 0);
+            // bldcController.setTargetVelocity(-300);
+        } else {
+            // bldcController.setTargetVoltage(5, 0);
+            bldcController.setTargetCurrent(0.4, 0);
+            // bldcController.setTargetVelocity(-300);
+        }
 
         // bldcController.setTargetCurrent(0.4, 0);
 
@@ -181,15 +181,23 @@ void app_main() {
             // printf("vd: %.2f vq: %.2f ", vd, vq);
             // printf("od: %.2f oq: %.2f ", currentProcessor.getDQCurrent().d, currentProcessor.getDQCurrent().q);
 
-            printf("rx_cnt: %d ", mcu.uartGetRxDataSize(MAL::P_UART::Controller));
+            // printf("rx_cnt: %d ", mcu.uartGetRxDataSize(MAL::P_UART::Controller));
 
-            printf("p_time %.2f\n", process_time);
+            // printf("p_time %.2f\n", process_time);
+
+            if (mcu.uartGetRxDataSize(MAL::P_UART::Controller) > 0) {
+                for (int i = 0; i < mcu.uartGetRxDataSize(MAL::P_UART::Controller); i++) {
+                    uint8_t data = mcu.uartGetChar(MAL::P_UART::Controller);
+                    printf("%x ", data);
+                }
+                fflush(stdout);
+            }
 
             print_cnt = 0;
 
-            uint8_t data[5] = {0x01, 0x02, 0x03, 0x04, 0x05};
+            // uint8_t data[5] = {0x01, 0x02, 0x03, 0x04, 0x05};
 
-            mcu.uartWriteViaBuffer(MAL::P_UART::Controller, data, 5);
+            // mcu.uartWriteViaBuffer(MAL::P_UART::Controller, data, 5);
         }
     }
 }
