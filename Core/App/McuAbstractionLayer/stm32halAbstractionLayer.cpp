@@ -126,20 +126,6 @@ uint16_t stm32halAbstractionLayer::adcGetValue(P_ADC p) {
             return 0;
     }
 
-    // switch (p) {
-    //     case P_ADC::U_Current:
-    //         return HAL_ADC_GetValue(PAL.ADC_Ins[PAL.ADC_Connected[U_Current]]);
-
-    //     case P_ADC::V_Current:
-    //         return HAL_ADC_GetValue(PAL.ADC_Ins[PAL.ADC_Connected[V_Current]]);
-
-    //     case P_ADC::W_Current:
-    //         return HAL_ADC_GetValue(PAL.ADC_Ins[PAL.ADC_Connected[W_Current]]);
-
-    //     default:
-    //         return 0;
-    // }
-
     return 0;
 }
 
@@ -263,7 +249,8 @@ bool stm32halAbstractionLayer::gpioGetValue(P_GPIO p) {
 
 // UART
 
-RingBuffer<uint8_t, STM32_MAL_UART_BUFFER_SIZE> stm32halAbstractionLayer::_uartRxBuffer[P_UART::End_U];
+DMA_BUFFER RingBuffer<uint8_t, STM32_MAL_UART_BUFFER_SIZE> stm32halAbstractionLayer::_uartRxBuffer[P_UART::End_U];
+DMA_BUFFER uint8_t stm32halAbstractionLayer::_uartTxBuffer[P_UART::End_U][STM32_MAL_UART_BUFFER_SIZE];
 
 void stm32halAbstractionLayer::_initUART() {
     while (HAL_UART_Receive_DMA(PAL.UART[MAL::P_UART::Controller], _uartRxBuffer[MAL::P_UART::Controller].Buffer, STM32_MAL_UART_BUFFER_SIZE) != HAL_OK) {
@@ -282,7 +269,8 @@ uint32_t stm32halAbstractionLayer::_uartGetRxBufferDmaWriteAddress(P_UART p) {
 
 void stm32halAbstractionLayer::uartPutChar(P_UART p, uint8_t data) {
     if (p != P_UART::End_U) {
-        while (HAL_UART_Transmit_DMA(PAL.UART[p], &data, 1) != HAL_OK) {
+        _uartTxBuffer[p][0] = data;
+        while (HAL_UART_Transmit_DMA(PAL.UART[p], _uartTxBuffer[p], 1) != HAL_OK) {
         }
     }
 }
@@ -298,7 +286,8 @@ uint8_t stm32halAbstractionLayer::uartGetChar(P_UART p) {
 
 void stm32halAbstractionLayer::uartWriteViaBuffer(P_UART p, uint8_t* data, uint32_t size) {
     if (p != P_UART::End_U) {
-        while (HAL_UART_Transmit_DMA(PAL.UART[p], data, size) != HAL_OK) {
+        memcpy(_uartTxBuffer[p], data, size);
+        while (HAL_UART_Transmit_DMA(PAL.UART[p], _uartTxBuffer[p], size) != HAL_OK) {
         }
     }
 }

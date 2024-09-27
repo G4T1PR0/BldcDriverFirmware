@@ -21,6 +21,7 @@
 #include "adc.h"
 #include "cordic.h"
 #include "crc.h"
+#include "dma.h"
 #include "memorymap.h"
 #include "spi.h"
 #include "tim.h"
@@ -113,6 +114,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_ADC1_Init();
   MX_ADC2_Init();
   MX_ADC3_Init();

@@ -15,6 +15,14 @@
 #define STM32_MAL_ADC_BUFFER_SIZE 50
 #define STM32_MAL_MCU_MODEL_NUMBER H7x
 
+#if defined(__ICCARM__)
+#define DMA_BUFFER \
+    _Pragma("location=\".dma_buffer\"")
+#else
+#define DMA_BUFFER \
+    __attribute__((section(".dma_buffer")))
+#endif
+
 class stm32halAbstractionLayer : public baseMcuAbstractionLayer {
    public:
     stm32halAbstractionLayer();
@@ -82,7 +90,8 @@ class stm32halAbstractionLayer : public baseMcuAbstractionLayer {
     // UART
     void _initUART();
     uint32_t _uartGetRxBufferDmaWriteAddress(P_UART p);
-    static RingBuffer<uint8_t, STM32_MAL_UART_BUFFER_SIZE> _uartRxBuffer[P_UART::End_U];
+    DMA_BUFFER static RingBuffer<uint8_t, STM32_MAL_UART_BUFFER_SIZE> _uartRxBuffer[P_UART::End_U];
+    DMA_BUFFER static uint8_t _uartTxBuffer[P_UART::End_U][STM32_MAL_UART_BUFFER_SIZE];
     uint32_t _uartRxBufferReadAddress[P_UART::End_U] = {0};
 
     // Interrupt

@@ -149,6 +149,10 @@ SECTIONS
     _edata = .;        /* define a global symbol at data end */
   } >DTCMRAM AT> FLASH
 
+  .dma_buffer : /* Space before ':' is critical */
+{
+  *(.dma_buffer)
+} >RAM
   
   /* Uninitialized data section */
   . = ALIGN(4);

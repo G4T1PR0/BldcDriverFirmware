@@ -24,6 +24,8 @@ void EncoderMCU::update() {
     _prev_cnt = _current_cnt;
     _current_cnt = _mcu->encoderGetCnt(_encoder);
 
+    _cnt = _current_cnt - _prev_cnt;
+
     if (_current_cnt - _prev_cnt > 32768) {
         _total_cnt += _current_cnt - _prev_cnt - 65536;
     } else if (_current_cnt - _prev_cnt < -32768) {
