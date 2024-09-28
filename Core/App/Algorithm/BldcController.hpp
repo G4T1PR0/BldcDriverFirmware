@@ -168,6 +168,14 @@ class BldcController {
         voltage_d = _voltage_d;
     }
 
+    float getApplyQVoltage() {
+        return _voltage_q;
+    }
+
+    float getApplyDVoltage() {
+        return _voltage_d;
+    }
+
     void setTargetCurrent(float current_q, float current_d) {
         _target_current_q = current_q;
         _target_current_d = current_d;
@@ -181,6 +189,14 @@ class BldcController {
     void getObservedCurrentDQ(float& current_q, float& current_d) {
         current_q = _observed_current_q;
         current_d = _observed_current_d;
+    }
+
+    float getObservedCurrentD() {
+        return _observed_current_d;
+    }
+
+    float getObservedCurrentQ() {
+        return _observed_current_q;
     }
 
     void setTargetVelocity(float velocity) {

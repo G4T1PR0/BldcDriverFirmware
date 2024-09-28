@@ -34,6 +34,19 @@ class CommandReciever {
     }
 
     void send() {
+        _feedbackValue.d.header[0] = 0xFF;
+        _feedbackValue.d.header[1] = 0xFF;
+        _feedbackValue.d.header[2] = 0xFD;
+        _feedbackValue.d.header[3] = 0x00;
+
+        _feedbackValue.d.mode = _bldcController->getMode();
+        _feedbackValue.d.voltage = _bldcController->getApplyQVoltage();
+        _feedbackValue.d.torque = _bldcController->getObservedCurrentQ();
+        _feedbackValue.d.velocity = _bldcController->getObservedVelocity();
+
+        _feedbackValue.d.crc = _mcu->crc32(_feedbackValue.b, sizeof(_feedbackValue_t) - sizeof(uint32_t));
+
+        _mcu->uartWriteViaBuffer(_uart, _feedbackValue.b, sizeof(_feedbackValue_t));
     }
 
     void update() {
@@ -46,11 +59,6 @@ class CommandReciever {
         _tempRecieveModeTargetValue.d.header[1] = 0xFF;
         _tempRecieveModeTargetValue.d.header[2] = 0xFD;
         _tempRecieveModeTargetValue.d.header[3] = 0x00;
-
-        _feedbackValue.d.header[0] = 0xFF;
-        _feedbackValue.d.header[1] = 0xFF;
-        _feedbackValue.d.header[2] = 0xFD;
-        _feedbackValue.d.header[3] = 0x00;
 
         unsigned int _rx_size = _mcu->uartGetRxDataSize(_uart);
         if (_rx_size > sizeof(_rx_buffer)) {
@@ -115,40 +123,43 @@ class CommandReciever {
 
         if (_rx_complete) {
             uint32_t rx_data_crc = _mcu->crc32(_recieveModeTargetValue.b, sizeof(_recieveModeTargetValue_t) - sizeof(uint32_t));
-            printf("crc: %x ", _recieveModeTargetValue.d.crc);
+            // printf("crc: %x ", _recieveModeTargetValue.d.crc);
 
-            printf("crc2 %x \n", rx_data_crc);
+            // printf("crc2 %x \n", rx_data_crc);
 
             if (_recieveModeTargetValue.d.crc == rx_data_crc) {
-                printf("%f\n", _recieveModeTargetValue.d.target);
+                // printf("%f\n", _recieveModeTargetValue.d.target);
                 // printf("crc ok\n");
-                // switch (_recieveModeTargetValue.d.instruction_id) {
-                //     case SendModeTargetValue:
-                //         _mode = (_Mode)_recieveModeTargetValue.d.mode;
-                //         switch (_mode) {
-                //             case VoltageControl:
-                //                 _target_voltage = _recieveModeTargetValue.d.target;
-                //                 break;
+                switch (_recieveModeTargetValue.d.instruction_id) {
+                    case SendModeTargetValue:
+                        _mode = (_Mode)_recieveModeTargetValue.d.mode;
+                        switch (_mode) {
+                            case VoltageControl:
+                                _bldcController->setMode(BldcController::Mode::VoltageControl);
+                                _bldcController->setTargetVoltage(_recieveModeTargetValue.d.target, 0);
+                                break;
 
-                //             case TorqueControl:
-                //                 _target_torque = _recieveModeTargetValue.d.target;
-                //                 break;
+                            case TorqueControl:
+                                _bldcController->setMode(BldcController::Mode::CurrentControl);
+                                _bldcController->setTargetCurrent(_recieveModeTargetValue.d.target, 0);
+                                break;
 
-                //             case VelocityControl:
-                //                 _target_velocity = _recieveModeTargetValue.d.target;
-                //                 break;
+                            case VelocityControl:
+                                _bldcController->setMode(BldcController::Mode::VelocityControl);
+                                _bldcController->setTargetVelocity(_recieveModeTargetValue.d.target);
+                                break;
 
-                //             default:
-                //                 break;
-                //         }
-                //         break;
+                            default:
+                                break;
+                        }
+                        break;
 
-                //     default:
-                //         break;
-                // }
+                    default:
+                        break;
+                }
 
             } else {
-                printf("crc fail\n");
+                // printf("crc fail\n");
             }
             _rx_complete = false;
         }
@@ -167,15 +178,6 @@ class CommandReciever {
     };
 
     _Mode _mode;
-
-    float _target_voltage = 0;
-    float _current_voltage = 0;
-
-    float _target_torque = 0;
-    float _observed_torque = 0;
-
-    float _target_velocity = 0;
-    float _observed_velocity = 0;
 
     uint8_t _rx_buffer[256];
 

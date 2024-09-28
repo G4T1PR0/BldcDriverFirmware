@@ -99,7 +99,7 @@ void app_main() {
     mcu.waitMs(1000);
 
     // bldcController.setMode(BldcController::Mode::VoltageControl);
-    bldcController.setMode(BldcController::Mode::CurrentControl);
+    bldcController.setMode(BldcController::Mode::Stop);
     // bldcController.setMode(BldcController::Mode::VelocityControl);
 
     // bldcController.setTargetCurrent(0, 0);
@@ -108,25 +108,25 @@ void app_main() {
     bool dir = false;
 
     while (1) {
-        if (mode_cnt > 2000) {
-            mode_cnt = 0;
-        } else if (mode_cnt > 1100) {
-            // bldcController.setTargetVoltage(-5, 0);
-            bldcController.setTargetCurrent(-0.4, 0);
-            // bldcController.setTargetVelocity(300);
-        } else if (mode_cnt > 1000) {
-            // bldcController.setTargetVoltage(-5, 0);
-            bldcController.setTargetCurrent(-0.4, 0);
-            // bldcController.setTargetVelocity(300);
-        } else if (mode_cnt > 100) {
-            // bldcController.setTargetVoltage(5, 0);
-            bldcController.setTargetCurrent(0.4, 0);
-            // bldcController.setTargetVelocity(-300);
-        } else {
-            // bldcController.setTargetVoltage(5, 0);
-            bldcController.setTargetCurrent(0.4, 0);
-            // bldcController.setTargetVelocity(-300);
-        }
+        // if (mode_cnt > 2000) {
+        //     mode_cnt = 0;
+        // } else if (mode_cnt > 1100) {
+        //     // bldcController.setTargetVoltage(-5, 0);
+        //     bldcController.setTargetCurrent(-0.4, 0);
+        //     // bldcController.setTargetVelocity(300);
+        // } else if (mode_cnt > 1000) {
+        //     // bldcController.setTargetVoltage(-5, 0);
+        //     bldcController.setTargetCurrent(-0.4, 0);
+        //     // bldcController.setTargetVelocity(300);
+        // } else if (mode_cnt > 100) {
+        //     // bldcController.setTargetVoltage(5, 0);
+        //     bldcController.setTargetCurrent(0.4, 0);
+        //     // bldcController.setTargetVelocity(-300);
+        // } else {
+        //     // bldcController.setTargetVoltage(5, 0);
+        //     bldcController.setTargetCurrent(0.4, 0);
+        //     // bldcController.setTargetVelocity(-300);
+        // }
 
         // bldcController.setTargetCurrent(0.4, 0);
 
@@ -146,7 +146,7 @@ void app_main() {
 
         commandReciever.update();
 
-        if (print_cnt > 100) {
+        if (print_cnt > 50) {
             // printf("e_cnt %8ld ", encoder.getTotalCnt());
             // printf("t_v %5.2f ", bldcController.getTargetVelocity());
             // printf("o_v %5.2f ", bldcController.getObservedVelocity());
@@ -197,23 +197,7 @@ void app_main() {
             //     fflush(stdout);
             // }
 
-            // uint8_t data[] = {0xff,
-            //                   0xff,
-            //                   0xfd,
-            //                   0x00,
-            //                   0x0a,
-            //                   0x02,
-            //                   0x00,
-            //                   0x00,
-            //                   0x80,
-            //                   0x3f,
-            //                   0x42,
-            //                   0x63,
-            //                   0xea,
-            //                   0xa8};
-
-            // uint32_t crcc = mcu.crc32(data, sizeof(data));
-            // printf("crc: %x\n", crcc);
+            commandReciever.send();
 
             print_cnt = 0;
 
