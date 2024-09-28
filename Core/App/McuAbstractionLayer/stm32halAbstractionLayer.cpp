@@ -10,6 +10,7 @@
 #include "adc.h"
 // #include "iwdg.h"
 #include "cordic.h"
+#include "crc.h"
 #include "math.h"
 #include "tim.h"
 #include "usart.h"
@@ -416,6 +417,7 @@ uint32_t stm32halAbstractionLayer::timerGetCnt(P_TimerCnt p) {
 }
 
 // Bootloader
+
 void stm32halAbstractionLayer::enterBootloader(void) {
     void (*SysMemBootJump)(void);
 
@@ -505,4 +507,10 @@ void stm32halAbstractionLayer::enterBootloader(void) {
     while (1) {
         /* Code should never reach this loop */
     }
+}
+
+// CRC
+
+uint32_t stm32halAbstractionLayer::crc32(uint8_t* data, uint32_t size) {
+    return HAL_CRC_Calculate(&hcrc, (uint32_t*)data, size);
 }

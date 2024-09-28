@@ -74,6 +74,9 @@ class stm32halAbstractionLayer : public baseMcuAbstractionLayer {
     // Bootloader
     virtual void enterBootloader(void);
 
+    // CRC
+    virtual uint32_t crc32(uint8_t* data, uint32_t size);
+
    private:
     // ADC
     void _initADC();

@@ -27,6 +27,8 @@ CurrentProcessor currentProcessor(&mcu, &currentSensor);
 ModulationProcessor modulationProcessor(&mcu, &driver);
 BldcController bldcController(&angleProcessor, &currentProcessor, &modulationProcessor);
 
+CommandReciever commandReciever(&mcu, MAL::P_UART::Controller, &bldcController);
+
 unsigned int print_cnt = 0;
 unsigned int mode_cnt = 0;
 unsigned int timer_1ms_cnt = 0;
@@ -142,6 +144,8 @@ void app_main() {
 
         // bldcController.setTargetCurrent(0.7, 0);
 
+        commandReciever.update();
+
         if (print_cnt > 100) {
             // printf("e_cnt %8ld ", encoder.getTotalCnt());
             // printf("t_v %5.2f ", bldcController.getTargetVelocity());
@@ -185,13 +189,31 @@ void app_main() {
 
             // printf("p_time %.2f\n", process_time);
 
-            if (mcu.uartGetRxDataSize(MAL::P_UART::Controller) > 0) {
-                for (int i = 0; i < mcu.uartGetRxDataSize(MAL::P_UART::Controller); i++) {
-                    uint8_t data = mcu.uartGetChar(MAL::P_UART::Controller);
-                    printf("%x ", data);
-                }
-                fflush(stdout);
-            }
+            // if (mcu.uartGetRxDataSize(MAL::P_UART::Controller) > 0) {
+            //     for (int i = 0; i < mcu.uartGetRxDataSize(MAL::P_UART::Controller); i++) {
+            //         uint8_t data = mcu.uartGetChar(MAL::P_UART::Controller);
+            //         printf("%x ", data);
+            //     }
+            //     fflush(stdout);
+            // }
+
+            // uint8_t data[] = {0xff,
+            //                   0xff,
+            //                   0xfd,
+            //                   0x00,
+            //                   0x0a,
+            //                   0x02,
+            //                   0x00,
+            //                   0x00,
+            //                   0x80,
+            //                   0x3f,
+            //                   0x42,
+            //                   0x63,
+            //                   0xea,
+            //                   0xa8};
+
+            // uint32_t crcc = mcu.crc32(data, sizeof(data));
+            // printf("crc: %x\n", crcc);
 
             print_cnt = 0;
 
