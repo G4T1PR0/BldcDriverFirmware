@@ -98,6 +98,9 @@ class baseMcuAbstractionLayer {
     // Bootloader
     virtual void enterBootloader(void) = 0;
 
+    // System Reset
+    virtual void systemReset(void) = 0;
+
     // CRC
     virtual uint32_t crc32(uint8_t* data, uint32_t size) = 0;
 };

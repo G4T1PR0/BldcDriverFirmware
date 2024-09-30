@@ -509,6 +509,12 @@ void stm32halAbstractionLayer::enterBootloader(void) {
     }
 }
 
+// System Reset
+
+void stm32halAbstractionLayer::systemReset(void) {
+    NVIC_SystemReset();
+}
+
 // CRC
 
 uint32_t stm32halAbstractionLayer::crc32(uint8_t* data, uint32_t size) {

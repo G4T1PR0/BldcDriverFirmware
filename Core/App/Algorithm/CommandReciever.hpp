@@ -22,31 +22,29 @@ class CommandReciever {
         _recieveModeTargetValue.d.header[2] = 0xFD;
         _recieveModeTargetValue.d.header[3] = 0x00;
 
-        _recieveModeTargetValue.d.instruction_id = _instruction::SendModeTargetValue;
+        _recieveModeTargetValue.d.packet_id = _command_packet_id::SendModeTargetValue;
 
-        _feedbackValue.d.header[0] = 0xFF;
-        _feedbackValue.d.header[1] = 0xFF;
-        _feedbackValue.d.header[2] = 0xFD;
-        _feedbackValue.d.header[3] = 0x00;
-    }
-
-    void init() {
+        _motorStatusFeedback.d.header[0] = 0xFF;
+        _motorStatusFeedback.d.header[1] = 0xFF;
+        _motorStatusFeedback.d.header[2] = 0xFD;
+        _motorStatusFeedback.d.header[3] = 0x00;
     }
 
     void send() {
-        _feedbackValue.d.header[0] = 0xFF;
-        _feedbackValue.d.header[1] = 0xFF;
-        _feedbackValue.d.header[2] = 0xFD;
-        _feedbackValue.d.header[3] = 0x00;
+        _motorStatusFeedback.d.header[0] = 0xFF;
+        _motorStatusFeedback.d.header[1] = 0xFF;
+        _motorStatusFeedback.d.header[2] = 0xFD;
+        _motorStatusFeedback.d.header[3] = 0x00;
+        _motorStatusFeedback.d.packet_id = _feedback_packet_id::MotorStatus;
 
-        _feedbackValue.d.mode = _bldcController->getMode();
-        _feedbackValue.d.voltage = _bldcController->getApplyQVoltage();
-        _feedbackValue.d.torque = _bldcController->getObservedCurrentQ();
-        _feedbackValue.d.velocity = _bldcController->getObservedVelocity();
+        _motorStatusFeedback.d.mode = _bldcController->getMode();
+        _motorStatusFeedback.d.voltage = _bldcController->getApplyQVoltage();
+        _motorStatusFeedback.d.torque = _bldcController->getObservedCurrentQ();
+        _motorStatusFeedback.d.velocity = _bldcController->getObservedVelocity();
 
-        _feedbackValue.d.crc = _mcu->crc32(_feedbackValue.b, sizeof(_feedbackValue_t) - sizeof(uint32_t));
+        _motorStatusFeedback.d.crc = _mcu->crc32(_motorStatusFeedback.b, sizeof(_motorStatusFeedback_t) - sizeof(uint32_t));
 
-        _mcu->uartWriteViaBuffer(_uart, _feedbackValue.b, sizeof(_feedbackValue_t));
+        _mcu->uartWriteViaBuffer(_uart, _motorStatusFeedback.b, sizeof(_motorStatusFeedback_t));
     }
 
     void update() {
@@ -60,6 +58,11 @@ class CommandReciever {
         _tempRecieveModeTargetValue.d.header[2] = 0xFD;
         _tempRecieveModeTargetValue.d.header[3] = 0x00;
 
+        _tempOneShotCommand.d.header[0] = 0xFF;
+        _tempOneShotCommand.d.header[1] = 0xFF;
+        _tempOneShotCommand.d.header[2] = 0xFD;
+        _tempOneShotCommand.d.header[3] = 0x00;
+
         unsigned int _rx_size = _mcu->uartGetRxDataSize(_uart);
         if (_rx_size > sizeof(_rx_buffer)) {
             _rx_size = sizeof(_rx_buffer);
@@ -68,6 +71,7 @@ class CommandReciever {
         _mcu->uartReadViaBuffer(_uart, _rx_buffer, _rx_size);
 
         bool _rx_complete = false;
+        bool _rx_complete_oneshot = false;
 
         for (unsigned int i = 0; i < _rx_size; i++) {
             switch (_state) {
@@ -97,14 +101,43 @@ class CommandReciever {
 
                 case Header4:
                     if (_rx_buffer[i] == 0x00) {
-                        _state = CopyToBuffer;
-                        _rx_cnt = 4;
+                        _state = PacketID_Check;
                     } else {
                         _state = Header1;
                     }
                     break;
 
-                case CopyToBuffer:
+                case PacketID_Check:
+                    switch (_rx_buffer[i]) {
+                        case _command_packet_id::SendModeTargetValue:
+                            _rx_cnt = 4;
+                            _tempRecieveModeTargetValue.b[_rx_cnt] = _rx_buffer[i];
+                            _state = CopyToBuffer_ModeTargetValue;
+                            _rx_cnt = 5;
+                            break;
+
+                        case _command_packet_id::SystemReset:
+                            _rx_cnt = 4;
+                            _tempOneShotCommand.b[_rx_cnt] = _rx_buffer[i];
+                            _state = CopyToBuffer_OneShotCommand;
+                            _rx_cnt = 5;
+                            break;
+
+                        case _command_packet_id::EnterBootLoader:
+                            _rx_cnt = 4;
+                            _tempOneShotCommand.b[_rx_cnt] = _rx_buffer[i];
+                            _state = CopyToBuffer_OneShotCommand;
+                            _rx_cnt = 5;
+                            break;
+
+                        default:
+                            _state = Header1;
+                            _rx_cnt = 0;
+                            break;
+                    }
+                    break;
+
+                case CopyToBuffer_ModeTargetValue:
                     _tempRecieveModeTargetValue.b[_rx_cnt] = _rx_buffer[i];
                     _rx_cnt++;
 
@@ -113,6 +146,20 @@ class CommandReciever {
                         _rx_complete = true;
                         _rx_cnt = 0;
                         _recieveModeTargetValue = _tempRecieveModeTargetValue;
+                    }
+                    break;
+
+                case CopyToBuffer_OneShotCommand:
+                    _tempOneShotCommand.b[_rx_cnt] = _rx_buffer[i];
+                    // printf("cnt %d %x ", _rx_cnt, _rx_buffer[i]);
+                    _rx_cnt++;
+
+                    if (_rx_cnt >= sizeof(_oneShotCommand_t)) {
+                        _state = Header1;
+                        _rx_complete_oneshot = true;
+                        _rx_cnt = 0;
+                        _oneShotCommand = _tempOneShotCommand;
+                        printf("\n");
                     }
                     break;
 
@@ -130,7 +177,7 @@ class CommandReciever {
             if (_recieveModeTargetValue.d.crc == rx_data_crc) {
                 // printf("%f\n", _recieveModeTargetValue.d.target);
                 // printf("crc ok\n");
-                switch (_recieveModeTargetValue.d.instruction_id) {
+                switch (_recieveModeTargetValue.d.packet_id) {
                     case SendModeTargetValue:
                         _mode = (_Mode)_recieveModeTargetValue.d.mode;
                         switch (_mode) {
@@ -163,6 +210,37 @@ class CommandReciever {
             }
             _rx_complete = false;
         }
+
+        if (_rx_complete_oneshot) {
+            // printf("oneshot ");
+            for (int i = 0; i < sizeof(_oneShotCommand_t); i++) {
+                printf("%x ", _oneShotCommand.b[i]);
+            }
+            uint32_t rx_data_crc = _mcu->crc32(_oneShotCommand.b, sizeof(_oneShotCommand_union) - sizeof(uint32_t));
+            // printf("crc: %x ", _oneShotCommand.d.crc);
+
+            // printf("crc2 %x \n", rx_data_crc);
+
+            if (_oneShotCommand.d.crc == rx_data_crc) {
+                switch (_oneShotCommand.d.packet_id) {
+                    case SystemReset:
+                        _bldcController->setMode(BldcController::Mode::Stop);
+                        _mcu->systemReset();
+                        break;
+
+                    case EnterBootLoader:
+                        _bldcController->setMode(BldcController::Mode::Stop);
+                        _mcu->enterBootloader();
+                        break;
+
+                    default:
+                        break;
+                }
+            } else {
+                // printf("crc fail\n");
+            }
+            _rx_complete_oneshot = false;
+        }
     }
 
    private:
@@ -183,30 +261,54 @@ class CommandReciever {
 
     unsigned int _rx_cnt = 0;
 
-    enum _instruction {
+    // Packet ID
+
+    enum _command_packet_id {
         SendModeTargetValue = 10,
+        SystemReset = 90,
+        EnterBootLoader = 91,
     };
+
+    enum _feedback_packet_id {
+        MotorStatus = 20,
+    };
+
+    // Packet Process State
 
     enum _receivePacketState {
         Header1,
         Header2,
         Header3,
         Header4,
-        CopyToBuffer,
+        PacketID_Check,
+        CopyToBuffer_ModeTargetValue,
+        CopyToBuffer_OneShotCommand,
     };
 
     _receivePacketState _state = Header1;
 
+    // Commmand Protocol
+
     struct _recieveModeTargetValue_t {
         uint8_t header[4];
-        uint8_t instruction_id;
+        uint8_t packet_id;
         uint8_t mode;
         float target;
         uint32_t crc;
     } __attribute__((packed));
 
-    struct _feedbackValue_t {
+    struct _oneShotCommand_t {
         uint8_t header[4];
+        uint8_t packet_id;
+        uint8_t arg;
+        uint32_t crc;
+    } __attribute__((packed));
+
+    // Feedback Protocol
+
+    struct _motorStatusFeedback_t {
+        uint8_t header[4];
+        uint8_t packet_id;
         uint8_t mode;
         float voltage;
         float torque;
@@ -214,17 +316,29 @@ class CommandReciever {
         uint32_t crc;
     } __attribute__((packed));
 
+    // Packet Buffer Command
+
     union _recieveModeTargetValue_union {
         _recieveModeTargetValue_t d;
         uint8_t b[sizeof(_recieveModeTargetValue_t)];
     };
 
-    union _feedbackValue_union {
-        _feedbackValue_t d;
-        uint8_t b[sizeof(_feedbackValue_t)];
+    union _oneShotCommand_union {
+        _oneShotCommand_t d;
+        uint8_t b[sizeof(_oneShotCommand_t)];
+    };
+
+    // Packet Buffer Feedback
+
+    union _motorStatusFeedback_union {
+        _motorStatusFeedback_t d;
+        uint8_t b[sizeof(_motorStatusFeedback_t)];
     };
 
     _recieveModeTargetValue_union _recieveModeTargetValue;
     _recieveModeTargetValue_union _tempRecieveModeTargetValue;
-    _feedbackValue_union _feedbackValue;
+    _oneShotCommand_union _oneShotCommand;
+    _oneShotCommand_union _tempOneShotCommand;
+
+    _motorStatusFeedback_union _motorStatusFeedback;
 };
