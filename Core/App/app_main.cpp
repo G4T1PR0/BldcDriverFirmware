@@ -29,6 +29,7 @@ BldcController bldcController(&angleProcessor, &currentProcessor, &modulationPro
 
 CommandReciever commandReciever(&mcu, MAL::P_UART::Controller, &bldcController);
 
+unsigned int feedback_cnt = 0;
 unsigned int print_cnt = 0;
 unsigned int mode_cnt = 0;
 unsigned int timer_1ms_cnt = 0;
@@ -98,113 +99,18 @@ void app_main() {
     bldcController.beep(3500, 0.1, 100);
     mcu.waitMs(1000);
 
-    // bldcController.setMode(BldcController::Mode::VoltageControl);
     bldcController.setMode(BldcController::Mode::Stop);
-    // bldcController.setMode(BldcController::Mode::VelocityControl);
-
-    // bldcController.setTargetCurrent(0, 0);
-    // bldcController.setTargetVelocity(0);
-
-    bool dir = false;
 
     while (1) {
-        // if (mode_cnt > 2000) {
-        //     mode_cnt = 0;
-        // } else if (mode_cnt > 1100) {
-        //     // bldcController.setTargetVoltage(-5, 0);
-        //     bldcController.setTargetCurrent(-0.4, 0);
-        //     // bldcController.setTargetVelocity(300);
-        // } else if (mode_cnt > 1000) {
-        //     // bldcController.setTargetVoltage(-5, 0);
-        //     bldcController.setTargetCurrent(-0.4, 0);
-        //     // bldcController.setTargetVelocity(300);
-        // } else if (mode_cnt > 100) {
-        //     // bldcController.setTargetVoltage(5, 0);
-        //     bldcController.setTargetCurrent(0.4, 0);
-        //     // bldcController.setTargetVelocity(-300);
-        // } else {
-        //     // bldcController.setTargetVoltage(5, 0);
-        //     bldcController.setTargetCurrent(0.4, 0);
-        //     // bldcController.setTargetVelocity(-300);
-        // }
-
-        // bldcController.setTargetCurrent(0.4, 0);
-
-        // if (dir) {
-        //     bldcController.setTargetCurrent(0.15, 0);
-        //     if (bldcController.getObservedVelocity() > 500) {
-        //         dir = false;
-        //     }
-        // } else {
-        //     bldcController.setTargetCurrent(-0.15, 0);
-        //     if (bldcController.getObservedVelocity() < -500) {
-        //         dir = true;
-        //     }
-        // }
-
-        // bldcController.setTargetCurrent(0.7, 0);
-
         commandReciever.update();
 
-        if (print_cnt > 50) {
-            // printf("e_cnt %8ld ", encoder.getTotalCnt());
-            // printf("t_v %5.2f ", bldcController.getTargetVelocity());
-            // printf("o_v %5.2f ", bldcController.getObservedVelocity());
-            // printf("p_time %4.2fus\n", process_time);
-
-            ////
-
-            // printf("encoder %ld ", encoder.getTotalCnt());
-            // printf("e_a %f ", angleProcessor.getElectricalAngle());
-            // printf("m_a %f ", angleProcessor.getMechanicalAngle());
-            // printf("v1 %f ", encoder.getVelocity());
-            // printf("rad/s %.2f ", bldcController.getObservedVelocity());
-            // printf("rpm %.2f ", bldcController.getObservedVelocity() * 60 / (2 * M_PI));
-            // printf("cnt20us %ld ", encoder.getCnt());
-
-            // float u, v, w;
-            // modulationProcessor.getDuty(u, v, w);
-            // printf("u: %.2f, v: %.2f, w: %.2f ", u, v, w);
-
-            // CurrentProcessor::PhaseCurrent_s current = currentProcessor.getPhaseCurrent();
-
-            // printf("uc: %.2f, vc: %.2f, wc: %.2f ", current.u, current.v, current.w);
-
-            // printf("a: %f b: %f ", currentProcessor.getAlphaBetaCurrent().alpha, currentProcessor.getAlphaBetaCurrent().beta);
-
-            // float t_qc, t_dc;
-
-            // bldcController.getTargetCurrent(t_qc, t_dc);
-
-            // printf("t_qc: %.2f t_dc: %.2f ", t_qc, t_dc);
-            // float vd;
-            // float vq;
-
-            // bldcController.getApplyVoltage(vq, vd);
-
-            // printf("vd: %.2f vq: %.2f ", vd, vq);
-            // printf("od: %.2f oq: %.2f ", currentProcessor.getDQCurrent().d, currentProcessor.getDQCurrent().q);
-
-            // printf("rx_cnt: %d ", mcu.uartGetRxDataSize(MAL::P_UART::Controller));
-
-            // printf("p_time %.2f\n", process_time);
-
-            // if (mcu.uartGetRxDataSize(MAL::P_UART::Controller) > 0) {
-            //     for (int i = 0; i < mcu.uartGetRxDataSize(MAL::P_UART::Controller); i++) {
-            //         uint8_t data = mcu.uartGetChar(MAL::P_UART::Controller);
-            //         printf("%x ", data);
-            //     }
-            //     fflush(stdout);
-            // }
-
+        if (feedback_cnt > 5) {
             commandReciever.send();
-
-            print_cnt = 0;
-
-            // uint8_t data[5] = {0x01, 0x02, 0x03, 0x04, 0x05};
-
-            // mcu.uartWriteViaBuffer(MAL::P_UART::Controller, data, 5);
         }
+
+        // if (print_cnt > 50) {
+        //     print_cnt = 0;
+        // }
     }
 }
 
@@ -215,7 +121,9 @@ void app_interrupt_20us() {  // 50kHz
     timer_1ms_cnt++;
     if (timer_1ms_cnt >= 50) {  // 1kHz
         encoder.update1kHz();
-        print_cnt++;
+        commandReciever.cnt++;
+        feedback_cnt++;
+        // print_cnt++;
         mode_cnt++;
         timer_1ms_cnt = 0;
     }

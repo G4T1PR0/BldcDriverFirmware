@@ -30,6 +30,8 @@ class CommandReciever {
         _motorStatusFeedback.d.header[3] = 0x00;
     }
 
+    unsigned int cnt = 0;
+
     void send() {
         _motorStatusFeedback.d.header[0] = 0xFF;
         _motorStatusFeedback.d.header[1] = 0xFF;
@@ -175,6 +177,7 @@ class CommandReciever {
             // printf("crc2 %x \n", rx_data_crc);
 
             if (_recieveModeTargetValue.d.crc == rx_data_crc) {
+                cnt = 0;
                 // printf("%f\n", _recieveModeTargetValue.d.target);
                 // printf("crc ok\n");
                 switch (_recieveModeTargetValue.d.packet_id) {
@@ -222,6 +225,7 @@ class CommandReciever {
             // printf("crc2 %x \n", rx_data_crc);
 
             if (_oneShotCommand.d.crc == rx_data_crc) {
+                cnt = 0;
                 switch (_oneShotCommand.d.packet_id) {
                     case SystemReset:
                         _bldcController->setMode(BldcController::Mode::Stop);
@@ -240,6 +244,11 @@ class CommandReciever {
                 // printf("crc fail\n");
             }
             _rx_complete_oneshot = false;
+        }
+        if (cnt > 100) {
+            _bldcController->setEnable(false);
+        } else {
+            _bldcController->setEnable(true);
         }
     }
 

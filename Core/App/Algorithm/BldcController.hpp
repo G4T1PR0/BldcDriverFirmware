@@ -86,14 +86,24 @@ class BldcController {
                 _voltage_q = _target_voltage_q;
                 _voltage_d = _target_voltage_d;
 
-                _modulationProcessor->setVoltage(_voltage_q, _voltage_d, _angleProcessor->getElectricalAngle());
+                if (_driver_enable) {
+                    _modulationProcessor->setVoltage(_voltage_q, _voltage_d, _angleProcessor->getElectricalAngle());
+                } else {
+                    _modulationProcessor->setVoltage(0, 0, _angleProcessor->getElectricalAngle());
+                }
+
                 break;
 
             case Mode::CurrentControl: {
                 _voltage_q = _pid_current_q.update(_target_current_q, _observed_current_q);
                 _voltage_d = _pid_current_d.update(_target_current_d, _observed_current_d);
 
-                _modulationProcessor->setVoltage(_voltage_q, _voltage_d, _angleProcessor->getElectricalAngle());
+                if (_driver_enable) {
+                    _modulationProcessor->setVoltage(_voltage_q, _voltage_d, _angleProcessor->getElectricalAngle());
+                } else {
+                    _modulationProcessor->setVoltage(0, 0, _angleProcessor->getElectricalAngle());
+                }
+
             } break;
 
             case Mode::VelocityControl: {
@@ -103,7 +113,11 @@ class BldcController {
                 _voltage_q = _pid_current_q.update(_target_current_q, _observed_current_q);
                 _voltage_d = _pid_current_d.update(_target_current_d, _observed_current_d);
 
-                _modulationProcessor->setVoltage(_voltage_q, _voltage_d, _angleProcessor->getElectricalAngle());
+                if (_driver_enable) {
+                    _modulationProcessor->setVoltage(_voltage_q, _voltage_d, _angleProcessor->getElectricalAngle());
+                } else {
+                    _modulationProcessor->setVoltage(0, 0, _angleProcessor->getElectricalAngle());
+                }
             } break;
 
             case Mode::Beep:
@@ -139,6 +153,10 @@ class BldcController {
         }
 
         _modulationProcessor->update();
+    }
+
+    void setEnable(bool enable) {
+        _driver_enable = enable;
     }
 
     void setMode(Mode mode) {
@@ -229,6 +247,8 @@ class BldcController {
     PID<float> _pid_current_d;
 
     PID<float> _pid_velocity;
+
+    bool _driver_enable = false;
 
     Mode _mode;
 
