@@ -8,7 +8,7 @@
 #include "app_main.h"
 #include <Algorithm/AngleProcessor.hpp>
 #include <Algorithm/BldcController.hpp>
-#include <Algorithm/CommandReciever.hpp>
+#include <Algorithm/CommandReceiver.hpp>
 #include <Algorithm/CurrentProcessor.hpp>
 #include <Algorithm/ModulationProcessor.hpp>
 #include <DeviceDriver/BLDCDriverMCU.hpp>
@@ -27,7 +27,7 @@ CurrentProcessor currentProcessor(&mcu, &currentSensor);
 ModulationProcessor modulationProcessor(&mcu, &driver);
 BldcController bldcController(&angleProcessor, &currentProcessor, &modulationProcessor);
 
-CommandReciever commandReciever(&mcu, MAL::P_UART::Controller, &bldcController);
+CommandReceiver commandReceiver(&mcu, MAL::P_UART::Controller, &bldcController);
 
 unsigned int feedback_cnt = 0;
 unsigned int print_cnt = 0;
@@ -102,10 +102,10 @@ void app_main() {
     bldcController.setMode(BldcController::Mode::Stop);
 
     while (1) {
-        commandReciever.update();
+        commandReceiver.update();
 
         if (feedback_cnt > 5) {
-            commandReciever.send();
+            commandReceiver.send();
         }
 
         // if (print_cnt > 50) {
@@ -121,7 +121,7 @@ void app_interrupt_20us() {  // 50kHz
     timer_1ms_cnt++;
     if (timer_1ms_cnt >= 50) {  // 1kHz
         encoder.update1kHz();
-        commandReciever.cnt++;
+        commandReceiver.cnt++;
         feedback_cnt++;
         // print_cnt++;
         mode_cnt++;

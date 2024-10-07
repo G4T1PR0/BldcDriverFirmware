@@ -1,5 +1,5 @@
 /*
- * CommandReciever.hpp
+ * CommandReceiver.hpp
  *
  *  Created on: Sep 25, 2024
  *      Author: G4T1PR0
@@ -10,19 +10,19 @@
 #include <Algorithm/bldcController.hpp>
 #include <McuAbstractionLayer/baseMcuAbstractionLayer.hpp>
 
-class CommandReciever {
+class CommandReceiver {
    public:
-    CommandReciever(baseMcuAbstractionLayer* mcu, baseMcuAbstractionLayer::P_UART uart, BldcController* bldcController) {
+    CommandReceiver(baseMcuAbstractionLayer* mcu, baseMcuAbstractionLayer::P_UART uart, BldcController* bldcController) {
         _mcu = mcu;
         _uart = uart;
         _bldcController = bldcController;
 
-        _recieveModeTargetValue.d.header[0] = 0xFF;
-        _recieveModeTargetValue.d.header[1] = 0xFF;
-        _recieveModeTargetValue.d.header[2] = 0xFD;
-        _recieveModeTargetValue.d.header[3] = 0x00;
+        _receiverModeTargetValue.d.header[0] = 0xFF;
+        _receiverModeTargetValue.d.header[1] = 0xFF;
+        _receiverModeTargetValue.d.header[2] = 0xFD;
+        _receiverModeTargetValue.d.header[3] = 0x00;
 
-        _recieveModeTargetValue.d.packet_id = _command_packet_id::SendModeTargetValue;
+        _receiverModeTargetValue.d.packet_id = _command_packet_id::SendModeTargetValue;
 
         _motorStatusFeedback.d.header[0] = 0xFF;
         _motorStatusFeedback.d.header[1] = 0xFF;
@@ -50,10 +50,10 @@ class CommandReciever {
     }
 
     void update() {
-        _recieveModeTargetValue.d.header[0] = 0xFF;
-        _recieveModeTargetValue.d.header[1] = 0xFF;
-        _recieveModeTargetValue.d.header[2] = 0xFD;
-        _recieveModeTargetValue.d.header[3] = 0x00;
+        _receiverModeTargetValue.d.header[0] = 0xFF;
+        _receiverModeTargetValue.d.header[1] = 0xFF;
+        _receiverModeTargetValue.d.header[2] = 0xFD;
+        _receiverModeTargetValue.d.header[3] = 0x00;
 
         _tempRecieveModeTargetValue.d.header[0] = 0xFF;
         _tempRecieveModeTargetValue.d.header[1] = 0xFF;
@@ -143,11 +143,11 @@ class CommandReciever {
                     _tempRecieveModeTargetValue.b[_rx_cnt] = _rx_buffer[i];
                     _rx_cnt++;
 
-                    if (_rx_cnt >= sizeof(_recieveModeTargetValue_t)) {
+                    if (_rx_cnt >= sizeof(_receiverModeTargetValue_t)) {
                         _state = Header1;
                         _rx_complete = true;
                         _rx_cnt = 0;
-                        _recieveModeTargetValue = _tempRecieveModeTargetValue;
+                        _receiverModeTargetValue = _tempRecieveModeTargetValue;
                     }
                     break;
 
@@ -171,32 +171,32 @@ class CommandReciever {
         }
 
         if (_rx_complete) {
-            uint32_t rx_data_crc = _mcu->crc32(_recieveModeTargetValue.b, sizeof(_recieveModeTargetValue_t) - sizeof(uint32_t));
-            // printf("crc: %x ", _recieveModeTargetValue.d.crc);
+            uint32_t rx_data_crc = _mcu->crc32(_receiverModeTargetValue.b, sizeof(_receiverModeTargetValue_t) - sizeof(uint32_t));
+            // printf("crc: %x ", _receiverModeTargetValue.d.crc);
 
             // printf("crc2 %x \n", rx_data_crc);
 
-            if (_recieveModeTargetValue.d.crc == rx_data_crc) {
+            if (_receiverModeTargetValue.d.crc == rx_data_crc) {
                 cnt = 0;
-                // printf("%f\n", _recieveModeTargetValue.d.target);
+                // printf("%f\n", _receiverModeTargetValue.d.target);
                 // printf("crc ok\n");
-                switch (_recieveModeTargetValue.d.packet_id) {
+                switch (_receiverModeTargetValue.d.packet_id) {
                     case SendModeTargetValue:
-                        _mode = (_Mode)_recieveModeTargetValue.d.mode;
+                        _mode = (_Mode)_receiverModeTargetValue.d.mode;
                         switch (_mode) {
                             case VoltageControl:
                                 _bldcController->setMode(BldcController::Mode::VoltageControl);
-                                _bldcController->setTargetVoltage(_recieveModeTargetValue.d.target, 0);
+                                _bldcController->setTargetVoltage(_receiverModeTargetValue.d.target, 0);
                                 break;
 
                             case TorqueControl:
                                 _bldcController->setMode(BldcController::Mode::CurrentControl);
-                                _bldcController->setTargetCurrent(_recieveModeTargetValue.d.target, 0);
+                                _bldcController->setTargetCurrent(_receiverModeTargetValue.d.target, 0);
                                 break;
 
                             case VelocityControl:
                                 _bldcController->setMode(BldcController::Mode::VelocityControl);
-                                _bldcController->setTargetVelocity(_recieveModeTargetValue.d.target);
+                                _bldcController->setTargetVelocity(_receiverModeTargetValue.d.target);
                                 break;
 
                             default:
@@ -298,7 +298,7 @@ class CommandReciever {
 
     // Commmand Protocol
 
-    struct _recieveModeTargetValue_t {
+    struct _receiverModeTargetValue_t {
         uint8_t header[4];
         uint8_t packet_id;
         uint8_t mode;
@@ -327,9 +327,9 @@ class CommandReciever {
 
     // Packet Buffer Command
 
-    union _recieveModeTargetValue_union {
-        _recieveModeTargetValue_t d;
-        uint8_t b[sizeof(_recieveModeTargetValue_t)];
+    union _receiverModeTargetValue_union {
+        _receiverModeTargetValue_t d;
+        uint8_t b[sizeof(_receiverModeTargetValue_t)];
     };
 
     union _oneShotCommand_union {
@@ -344,8 +344,8 @@ class CommandReciever {
         uint8_t b[sizeof(_motorStatusFeedback_t)];
     };
 
-    _recieveModeTargetValue_union _recieveModeTargetValue;
-    _recieveModeTargetValue_union _tempRecieveModeTargetValue;
+    _receiverModeTargetValue_union _receiverModeTargetValue;
+    _receiverModeTargetValue_union _tempRecieveModeTargetValue;
     _oneShotCommand_union _oneShotCommand;
     _oneShotCommand_union _tempOneShotCommand;
 
