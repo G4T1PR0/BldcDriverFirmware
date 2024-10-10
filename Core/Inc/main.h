@@ -69,6 +69,8 @@ void Error_Handler(void);
 #define Debug_RX_GPIO_Port GPIOA
 #define V_Phase_CurrentFeedback_Pin GPIO_PIN_5
 #define V_Phase_CurrentFeedback_GPIO_Port GPIOA
+#define BattVoltage_Pin GPIO_PIN_6
+#define BattVoltage_GPIO_Port GPIOA
 #define U_Phase_LoSide_Pin GPIO_PIN_7
 #define U_Phase_LoSide_GPIO_Port GPIOA
 #define U_Phase_CurrentFeedback_Pin GPIO_PIN_5

@@ -303,11 +303,12 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
     __HAL_RCC_GPIOA_CLK_ENABLE();
     /**ADC1 GPIO Configuration
     PA5     ------> ADC1_INP19
+    PA6     ------> ADC1_INP3
     */
-    GPIO_InitStruct.Pin = V_Phase_CurrentFeedback_Pin;
+    GPIO_InitStruct.Pin = V_Phase_CurrentFeedback_Pin|BattVoltage_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(V_Phase_CurrentFeedback_GPIO_Port, &GPIO_InitStruct);
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /* USER CODE BEGIN ADC1_MspInit 1 */
 
@@ -373,8 +374,9 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 
     /**ADC1 GPIO Configuration
     PA5     ------> ADC1_INP19
+    PA6     ------> ADC1_INP3
     */
-    HAL_GPIO_DeInit(V_Phase_CurrentFeedback_GPIO_Port, V_Phase_CurrentFeedback_Pin);
+    HAL_GPIO_DeInit(GPIOA, V_Phase_CurrentFeedback_Pin|BattVoltage_Pin);
 
   /* USER CODE BEGIN ADC1_MspDeInit 1 */
 
