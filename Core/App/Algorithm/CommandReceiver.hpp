@@ -183,7 +183,12 @@ class CommandReceiver {
                 switch (_receiverModeTargetValue.d.packet_id) {
                     case SendModeTargetValue:
                         _mode = (_Mode)_receiverModeTargetValue.d.mode;
+                        // printf("mode %d\n", _mode);
                         switch (_mode) {
+                            case Stop:
+                                _bldcController->setMode(BldcController::Mode::Stop);
+                                break;
+
                             case VoltageControl:
                                 _bldcController->setMode(BldcController::Mode::VoltageControl);
                                 _bldcController->setTargetVoltage(_receiverModeTargetValue.d.target, 0);
@@ -200,6 +205,8 @@ class CommandReceiver {
                                 break;
 
                             default:
+                                printf("mode error\n");
+                                _bldcController->setMode(BldcController::Mode::Stop);
                                 break;
                         }
                         break;
