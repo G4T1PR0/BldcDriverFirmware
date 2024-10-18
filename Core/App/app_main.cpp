@@ -35,7 +35,7 @@ unsigned int feedback_cnt = 0;
 unsigned int print_cnt = 0;
 unsigned int mode_cnt = 0;
 unsigned int timer_1ms_cnt = 0;
-unsigned int timer_10khz_cnt = 0;
+unsigned int timer_25khz_cnt = 0;
 float process_time = 0;
 
 void app_interrupt_20us();
@@ -136,10 +136,10 @@ void app_interrupt_20us() {  // 50kHz
         timer_1ms_cnt = 0;
     }
 
-    timer_10khz_cnt++;
-    if (timer_10khz_cnt >= 5) {  // 10kHz
+    timer_25khz_cnt++;
+    if (timer_25khz_cnt >= 2) {  // 25kHz
         musicReceiver.updateBldc();
-        timer_10khz_cnt = 0;
+        timer_25khz_cnt = 0;
     }
 
     process_time = float(mcu.timerGetCnt(MAL::P_TimerCnt::C1)) * 1 / 275000000 * 1000000;
