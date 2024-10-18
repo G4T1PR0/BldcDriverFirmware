@@ -223,7 +223,7 @@ class CommandReceiver {
 
         if (_rx_complete_oneshot) {
             // printf("oneshot ");
-            for (int i = 0; i < sizeof(_oneShotCommand_t); i++) {
+            for (unsigned int i = 0; i < sizeof(_oneShotCommand_t); i++) {
                 printf("%x ", _oneShotCommand.b[i]);
             }
             uint32_t rx_data_crc = _mcu->crc32(_oneShotCommand.b, sizeof(_oneShotCommand_union) - sizeof(uint32_t));

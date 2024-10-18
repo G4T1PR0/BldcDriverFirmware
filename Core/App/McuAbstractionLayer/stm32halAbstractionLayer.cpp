@@ -262,6 +262,9 @@ void stm32halAbstractionLayer::_initUART() {
 
     while (HAL_UART_Receive_DMA(PAL.UART[MAL::P_UART::Debug], _uartRxBuffer[MAL::P_UART::Debug].Buffer, STM32_MAL_UART_BUFFER_SIZE) != HAL_OK) {
     }
+
+    __HAL_UART_DISABLE_IT(PAL.UART[MAL::P_UART::Debug], UART_IT_PE);
+    __HAL_UART_DISABLE_IT(PAL.UART[MAL::P_UART::Debug], UART_IT_ERR);
 }
 
 uint32_t stm32halAbstractionLayer::_uartGetRxBufferDmaWriteAddress(P_UART p) {

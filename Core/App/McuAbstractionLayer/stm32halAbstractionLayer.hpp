@@ -11,7 +11,7 @@
 #include <McuAbstractionLayer/RingBuffer.hpp>
 #include <McuAbstractionLayer/baseMcuAbstractionLayer.hpp>
 
-#define STM32_MAL_UART_BUFFER_SIZE 512
+#define STM32_MAL_UART_BUFFER_SIZE 1024
 #define STM32_MAL_ADC_BUFFER_SIZE 50
 #define STM32_MAL_MCU_MODEL_NUMBER H7x
 
