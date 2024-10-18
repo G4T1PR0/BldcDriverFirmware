@@ -99,12 +99,45 @@ class MusicReceiver {
 
     void updateBldc() {
         if (_play) {
-            float amplitude = _buffer.pop() * 0.0002;
-            // if (amplitude > 0.5) {
-            //     amplitude = 0.5;
-            // } else if (amplitude < -0.5) {
-            //     amplitude = -0.5;
-            // }
+            float amplitude = _buffer.pop() * 0.00001;
+
+            _mode_cnt++;
+            switch (_mode) {
+                case 0:
+                    if (_mode_cnt > 250 * 100) {
+                        _mode = 1;
+                        _mode_cnt = 0;
+                    };
+                    break;
+
+                case 1:
+                    amplitude += 0.07;
+                    if (_mode_cnt > 250 * 100) {
+                        _mode = 2;
+                        _mode_cnt = 0;
+                    }
+                    break;
+
+                case 2:
+                    if (_mode_cnt > 250 * 100) {
+                        _mode = 3;
+                        _mode_cnt = 0;
+                    }
+                    break;
+
+                case 3:
+                    amplitude -= 0.07;
+                    if (_mode_cnt > 250 * 100) {
+                        _mode = 0;
+                        _mode_cnt = 0;
+                    }
+                    break;
+
+                default:
+                    _mode = 0;
+                    break;
+            }
+
             _bldc->setTargetCurrent(amplitude, 0);
         } else {
             _bldc->setTargetCurrent(0, 0);
@@ -130,6 +163,9 @@ class MusicReceiver {
     unsigned int _rx_cnt;
 
     bool _play = false;
+
+    int _mode = 0;
+    unsigned int _mode_cnt = 0;
 
     MAL::P_UART _uart;
 };
