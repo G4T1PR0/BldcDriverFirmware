@@ -111,7 +111,7 @@ class MusicReceiver {
                     break;
 
                 case 1:
-                    amplitude += 0.07;
+                    amplitude += 0.1;
                     if (_mode_cnt > 250 * 100) {
                         _mode = 2;
                         _mode_cnt = 0;
@@ -126,7 +126,7 @@ class MusicReceiver {
                     break;
 
                 case 3:
-                    amplitude -= 0.07;
+                    amplitude -= 0.1;
                     if (_mode_cnt > 250 * 100) {
                         _mode = 0;
                         _mode_cnt = 0;
