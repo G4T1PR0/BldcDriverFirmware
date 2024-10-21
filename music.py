@@ -3,13 +3,16 @@ import serial
 import time
 import struct
 
-ser = serial.Serial("/dev/tty.usbmodem1202", 1843200)
+# ser = serial.Serial("/dev/tty.usbmodem1202", 1843200)
+ser = serial.Serial("/dev/tty.usbmodem1202", 5529600)
 
 
 def main():
     print("Start")
     # samplerate, data = wavfile.read("./output25000mono.wav")
-    samplerate, data = wavfile.read("./zako.wav")
+    samplerate, data = wavfile.read("./output50000mono.wav")
+    # samplerate, data = wavfile.read("./zako50000.wav")
+    # samplerate, data = wavfile.read("./warutsu.wav")
 
     print("sample rate:", samplerate)
     # for i in range(5000, 5100):
@@ -36,20 +39,29 @@ def main():
             elif rx_data == "q":
                 send = True
 
-            print(rx_data, end="")
-        else:
+            # print(rx_data, end="")
+
             # time.sleep(0.1)
 
-            if send == True:
-                send_data = data[cnt]
+        if send == True:
+            send_data = int(data[cnt] * 0.4)
 
-                a = struct.pack(">BBBh", 0xFF, 0xFD, 00, send_data)
-                # print("                  send:                    ", send_data)
-                ser.write(a)
+            if send_data > 32767:
+                send_data = 32767
 
-                cnt += 1
-                if cnt >= len(data):
-                    cnt = 0
+            if send_data < -32768:
+                send_data = -32768
+
+            a = struct.pack(">BBBh", 0xFF, 0xFD, 00, send_data)
+            # print("                  send:                    ", send_data)
+            ser.write(a)
+
+            cnt += 1
+            if cnt >= len(data):
+                cnt = 0
+
+        # else:
+        #     time.sleep(0.001)
 
 
 main()
