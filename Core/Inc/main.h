@@ -73,6 +73,8 @@ void Error_Handler(void);
 #define BattVoltage_GPIO_Port GPIOA
 #define U_Phase_LoSide_Pin GPIO_PIN_7
 #define U_Phase_LoSide_GPIO_Port GPIOA
+#define DCBus_InputCurrentFeedback_Pin GPIO_PIN_4
+#define DCBus_InputCurrentFeedback_GPIO_Port GPIOC
 #define U_Phase_CurrentFeedback_Pin GPIO_PIN_5
 #define U_Phase_CurrentFeedback_GPIO_Port GPIOC
 #define V_Phase_LoSide_Pin GPIO_PIN_0
