@@ -108,7 +108,8 @@ void app_main() {
             commandReceiver.send();
         }
 
-        // if (print_cnt > 50) {
+        // if (print_cnt > 100) {
+        //     printf("\x1b[32m[Main Thread]\x1b[39m p_time: %f\n", process_time);
         //     print_cnt = 0;
         // }
     }
@@ -128,5 +129,5 @@ void app_interrupt_20us() {  // 50kHz
         timer_1ms_cnt = 0;
     }
 
-    process_time = float(mcu.timerGetCnt(MAL::P_TimerCnt::C1)) * 1 / 275000000 * 1000000;
+    process_time = float(mcu.timerGetCnt(MAL::P_TimerCnt::C1));
 }

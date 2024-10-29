@@ -70,6 +70,7 @@ class stm32halAbstractionLayer : public baseMcuAbstractionLayer {
     // Timer Counter
     virtual void timerSetCnt(P_TimerCnt p, uint32_t cnt);
     virtual uint32_t timerGetCnt(P_TimerCnt p);
+    static inline unsigned int _interrupt_cnt[P_TimerCnt::End_C] = {0};
 
     // Bootloader
     virtual void enterBootloader(void);

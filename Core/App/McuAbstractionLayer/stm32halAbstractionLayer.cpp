@@ -336,6 +336,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
         if (stm32halAbstractionLayer::_timerInterruptCallback[MAL::P_Interrupt::T20us] != NULL) {
             stm32halAbstractionLayer::_timerInterruptCallback[MAL::P_Interrupt::T20us]();
         }
+    } else if (htim == PAL.Cnt_Timer[MAL::P_TimerCnt::C1]) {
+        stm32halAbstractionLayer::_interrupt_cnt[MAL::P_TimerCnt::C1]++;
     }
 }
 
@@ -411,7 +413,7 @@ void stm32halAbstractionLayer::timerSetCnt(P_TimerCnt p, uint32_t cnt) {
 
 uint32_t stm32halAbstractionLayer::timerGetCnt(P_TimerCnt p) {
     if (p != P_TimerCnt::End_C) {
-        return __HAL_TIM_GET_COUNTER(PAL.Cnt_Timer[p]);
+        return __HAL_TIM_GET_COUNTER(PAL.Cnt_Timer[p]) + _interrupt_cnt[p] * 65535;
     }
     return 0;
 }
