@@ -26,13 +26,13 @@ void EncoderMCU::update() {
 
     _cnt = _current_cnt - _prev_cnt;
 
-    if (_current_cnt - _prev_cnt > 32768) {
-        _total_cnt += _current_cnt - _prev_cnt - 65536;
-    } else if (_current_cnt - _prev_cnt < -32768) {
-        _total_cnt += _current_cnt - _prev_cnt + 65536;
-    } else {
-        _total_cnt += _current_cnt - _prev_cnt;
+    if (_cnt > 32768) {
+        _cnt -= 65536;
+    } else if (_cnt < -32768) {
+        _cnt += 65536;
     }
+
+    _total_cnt += _cnt;
 }
 
 void EncoderMCU::update1kHz() {
