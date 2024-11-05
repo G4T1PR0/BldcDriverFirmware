@@ -28,7 +28,7 @@ class CurrentSensorMCU : public baseCurrentSensor {
     const float _raw2voltage12bit = 3.3f / (1 << 12);
     const float _raw2voltage16bit = 3.3f / (1 << 16);
 
-    const float _voltage2current = 0.033f;
+    const float _voltage2current = 0.050f;
 
     const int _currentSensorOffset_NUM = 1000;
     float _currentSensorOffset_Sum[End_C];

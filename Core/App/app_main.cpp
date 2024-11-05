@@ -101,6 +101,10 @@ void app_main() {
 
     bldcController.setMode(BldcController::Mode::Stop);
 
+    // bldcController.setEnable(true);
+    // bldcController.setMode(BldcController::Mode::CurrentControl);
+    // bldcController.setTargetCurrent(0.1, 0);
+
     while (1) {
         commandReceiver.update();
 
