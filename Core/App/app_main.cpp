@@ -107,11 +107,11 @@ void app_main() {
     // bldcController.setTargetCurrent(0.5, 0);
 
     while (1) {
-        // commandReceiver.update();
+        commandReceiver.update();
 
-        // if (feedback_cnt > 5) {
-        //     commandReceiver.send();
-        // }
+        if (feedback_cnt > 5) {
+            commandReceiver.send();
+        }
 
         // if (print_cnt > 100) {
         //     printf("\x1b[32m[Main Thread]\x1b[39m p_time: %f\n", process_time);
