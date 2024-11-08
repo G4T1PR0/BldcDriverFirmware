@@ -53,6 +53,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Core/App/McuAbstractionLayer/stm32halAbstractionLayer.cpp
     Core/App/DeviceDriver/CurrentSensorMCU.cpp
     Core/App/DeviceDriver/BLDCDriverMCU.cpp
+    Core/App/DeviceDriver/DCMotorDriver.cpp
     Core/App/DeviceDriver/EncoderMCU.cpp
 )
 

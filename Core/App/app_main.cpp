@@ -13,6 +13,7 @@
 #include <Algorithm/ModulationProcessor.hpp>
 #include <DeviceDriver/BLDCDriverMCU.hpp>
 #include <DeviceDriver/CurrentSensorMCU.hpp>
+#include <DeviceDriver/DCMotorDriver.hpp>
 #include <DeviceDriver/EncoderMCU.hpp>
 #include <McuAbstractionLayer/stm32halAbstractionLayer.hpp>
 
@@ -103,14 +104,14 @@ void app_main() {
 
     // bldcController.setEnable(true);
     // bldcController.setMode(BldcController::Mode::CurrentControl);
-    // bldcController.setTargetCurrent(0.1, 0);
+    // bldcController.setTargetCurrent(0.5, 0);
 
     while (1) {
-        commandReceiver.update();
+        // commandReceiver.update();
 
-        if (feedback_cnt > 5) {
-            commandReceiver.send();
-        }
+        // if (feedback_cnt > 5) {
+        //     commandReceiver.send();
+        // }
 
         // if (print_cnt > 100) {
         //     printf("\x1b[32m[Main Thread]\x1b[39m p_time: %f\n", process_time);
