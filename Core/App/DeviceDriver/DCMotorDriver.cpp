@@ -34,12 +34,33 @@ void DCMotorDriverMCU::update(void) {
 }
 
 void DCMotorDriverMCU::setPWM(float duty) {
+    if (duty > 1) {
+        duty = 1;
+    } else if (duty < -1) {
+        duty = -1;
+    }
+
+    float _temp_duty1 = 0.73 + duty * 0.22;
+    float _temp_duty2 = 0.27 - duty * 0.22;
+
+    if (_temp_duty1 > 0.95) {
+        _temp_duty1 = 0.95;
+    } else if (_temp_duty1 < 0.05) {
+        _temp_duty1 = 0.05;
+    }
+
+    if (_temp_duty2 > 0.95) {
+        _temp_duty2 = 0.95;
+    } else if (_temp_duty2 < 0.05) {
+        _temp_duty2 = 0.05;
+    }
+
     if (duty > 0) {
-        _hb1_duty = duty;
-        _hb2_duty = 0;
+        _hb1_duty = _temp_duty1;
+        _hb2_duty = _temp_duty2;
     } else if (duty < 0) {
-        _hb1_duty = 0;
-        _hb2_duty = duty;
+        _hb1_duty = _temp_duty2;
+        _hb2_duty = _temp_duty1;
     } else {
         _hb1_duty = 0;
         _hb2_duty = 0;

@@ -6,12 +6,10 @@
  */
 
 #include "app_main.h"
-#include <Algorithm/AngleProcessor.hpp>
-#include <Algorithm/BldcController.hpp>
+
 #include <Algorithm/CommandReceiver.hpp>
-#include <Algorithm/CurrentProcessor.hpp>
-#include <Algorithm/ModulationProcessor.hpp>
-#include <DeviceDriver/BLDCDriverMCU.hpp>
+#include <Algorithm/DcMotorController.hpp>
+
 #include <DeviceDriver/CurrentSensorMCU.hpp>
 #include <DeviceDriver/DCMotorDriver.hpp>
 #include <DeviceDriver/EncoderMCU.hpp>
@@ -20,15 +18,11 @@
 stm32halAbstractionLayer mcu;
 
 CurrentSensorMCU currentSensor(&mcu, MAL::P_ADC::U_Current, MAL::P_ADC::V_Current, MAL::P_ADC::W_Current);
-BLDCDriverMCU driver(&mcu, MAL::P_PWM::U_PWM, MAL::P_PWM::V_PWM, MAL::P_PWM::W_PWM);
+DCMotorDriverMCU driver(&mcu, MAL::P_PWM::U_PWM, MAL::P_PWM::V_PWM);
 EncoderMCU encoder(&mcu, MAL::P_Encoder::Main_Encoder);
 
-AngleProcessor angleProcessor(&encoder);
-CurrentProcessor currentProcessor(&mcu, &currentSensor);
-ModulationProcessor modulationProcessor(&mcu, &driver);
-BldcController bldcController(&angleProcessor, &currentProcessor, &modulationProcessor);
-
-CommandReceiver commandReceiver(&mcu, MAL::P_UART::Controller, &bldcController);
+DcMotorController dcMotorController(&driver, &currentSensor, &encoder);
+// CommandReceiver commandReceiver(&mcu, MAL::P_UART::Controller, &bldcController);
 
 unsigned int feedback_cnt = 0;
 unsigned int print_cnt = 0;
@@ -45,11 +39,7 @@ void app_init() {
     driver.init();
     encoder.init();
 
-    angleProcessor.init();
-    modulationProcessor.init();
-    currentProcessor.init();
-
-    bldcController.init();
+    dcMotorController.init();
 
     mcu.interruptSetCallback(MAL::P_Interrupt::T20us, app_interrupt_20us);
 
@@ -63,11 +53,11 @@ void app_init() {
 | | |  __/  _ < (_) |_____|__) |__) | |___ 
 |_|  \___|_| \_\___/     |____/____/|_____|
                                                
- ____  _     _      ____       _                
-| __ )| | __| | ___|  _ \ _ __(_)_   _____ _ __ 
-|  _ \| |/ _` |/ __| | | | '__| \ \ / / _ \ '__|
-| |_) | | (_| | (__| |_| | |  | |\ V /  __/ |   
-|____/|_|\__,_|\___|____/|_|  |_| \_/ \___|_|   
+ ____       ____       _                
+|  _ \  ___|  _ \ _ __(_)_   _____ _ __ 
+| | | |/ __| | | | '__| \ \ / / _ \ '__|
+| |_| | (__| |_| | |  | |\ V /  __/ |   
+|____/ \___|____/|_|  |_| \_/ \___|_|  
                                           
 )EOF");
 
@@ -79,57 +69,54 @@ void app_main() {
 
     mcu.gpioSetValue(MAL::P_GPIO::Driver_Power_Switch, true);
 
-    mcu.waitMs(500);
-    bldcController.beep(2045, 0.1, 350);
-    mcu.waitMs(500);
-
-    printf("\x1b[32m[Main Thread]\x1b[39m Calibration Start\n");
-
-    bldcController.setMode(BldcController::Mode::Calibration1);
-
-    while (bldcController.getMode() != BldcController::Mode::Stop) {
-    }
-
-    printf("\x1b[32m[Main Thread]\x1b[39m Calibration End\n");
-
+    driver.enable(true);
     mcu.waitMs(300);
-    bldcController.beep(2045, 0.1, 250);
+    dcMotorController.beep(2045, 0.2, 250);
     mcu.waitMs(400);
-    bldcController.beep(3500, 0.1, 100);
+    dcMotorController.beep(3500, 0.2, 100);
     mcu.waitMs(150);
-    bldcController.beep(3500, 0.1, 100);
+    dcMotorController.beep(3500, 0.2, 100);
     mcu.waitMs(1000);
 
-    bldcController.setMode(BldcController::Mode::Stop);
+    dcMotorController.setMode(DcMotorController::Mode::Stop);
 
     // bldcController.setEnable(true);
     // bldcController.setMode(BldcController::Mode::CurrentControl);
     // bldcController.setTargetCurrent(0.5, 0);
 
+    // mcu.pwmSetDuty(MAL::P_PWM::U_PWM, 0.95);
+    // mcu.pwmSetDuty(MAL::P_PWM::V_PWM, 0.05);
+
+    driver.enable(true);
+    dcMotorController.setMode(DcMotorController::Mode::CurrentControl);
+    dcMotorController.setEnable(true);
+    dcMotorController.setTargetCurrent(0.4);
+
     while (1) {
-        commandReceiver.update();
+        // commandReceiver.update();
 
         if (feedback_cnt > 5) {
-            commandReceiver.send();
+            // commandReceiver.send();
         }
 
-        // if (print_cnt > 100) {
-        //     printf("\x1b[32m[Main Thread]\x1b[39m p_time: %f\n", process_time);
-        //     print_cnt = 0;
-        // }
+        if (print_cnt > 100) {
+            // printf("\x1b[32m[Main Thread]\x1b[39m p_time: %f\n", process_time);
+            printf("\x1b[32m[Main Thread]\x1b[39m duty: %f c: %f\n", dcMotorController.getApplyDuty(), dcMotorController.getObservedCurrent());
+            print_cnt = 0;
+        }
     }
 }
 
 void app_interrupt_20us() {  // 50kHz
     mcu.timerSetCnt(MAL::P_TimerCnt::C1, 0);
-    bldcController.update();
+    dcMotorController.update();
 
     timer_1ms_cnt++;
     if (timer_1ms_cnt >= 50) {  // 1kHz
         encoder.update1kHz();
-        commandReceiver.cnt++;
+        // commandReceiver.cnt++;
         feedback_cnt++;
-        // print_cnt++;
+        print_cnt++;
         mode_cnt++;
         timer_1ms_cnt = 0;
     }
