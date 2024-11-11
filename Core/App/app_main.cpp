@@ -113,10 +113,12 @@ void app_main() {
             commandReceiver.send();
         }
 
-        // if (print_cnt > 100) {
-        //     printf("\x1b[32m[Main Thread]\x1b[39m p_time: %f\n", process_time);
-        //     print_cnt = 0;
-        // }
+        if (print_cnt > 100) {
+            // printf("\x1b[32m[Main Thread]\x1b[39m p_time: %f\n", process_time);
+            // printf("\x1b[32m[Main Thread]\x1b[39m Mode: %d\n", bldcController.getMode());
+            printf("\x1b[32m[Main Thread]\x1b[39m C_A %f C_B %f C_C %f\n", currentSensor.getCurrent(CurrentSensorMCU::U_C), currentSensor.getCurrent(CurrentSensorMCU::V_C), currentSensor.getCurrent(CurrentSensorMCU::W_C));
+            print_cnt = 0;
+        }
     }
 }
 
@@ -129,7 +131,7 @@ void app_interrupt_20us() {  // 50kHz
         encoder.update1kHz();
         commandReceiver.cnt++;
         feedback_cnt++;
-        // print_cnt++;
+        print_cnt++;
         mode_cnt++;
         timer_1ms_cnt = 0;
     }
