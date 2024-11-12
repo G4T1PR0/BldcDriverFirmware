@@ -46,6 +46,7 @@ void app_init() {
     encoder.init();
 
     angleProcessor.init();
+    angleProcessor.setDirection(true);
     modulationProcessor.init();
     currentProcessor.init();
 
@@ -104,7 +105,7 @@ void app_main() {
 
     // bldcController.setEnable(true);
     // bldcController.setMode(BldcController::Mode::CurrentControl);
-    // bldcController.setTargetCurrent(0.5, 0);
+    // bldcController.setTargetCurrent(0.8, 0);
 
     while (1) {
         commandReceiver.update();
@@ -116,8 +117,49 @@ void app_main() {
         if (print_cnt > 100) {
             // printf("\x1b[32m[Main Thread]\x1b[39m p_time: %f\n", process_time);
             // printf("\x1b[32m[Main Thread]\x1b[39m Mode: %d\n", bldcController.getMode());
-            printf("\x1b[32m[Main Thread]\x1b[39m C_A %f C_B %f C_C %f\n", currentSensor.getCurrent(CurrentSensorMCU::U_C), currentSensor.getCurrent(CurrentSensorMCU::V_C), currentSensor.getCurrent(CurrentSensorMCU::W_C));
-            print_cnt = 0;
+            // printf("\x1b[32m[Main Thread]\x1b[39m C_A %f C_B %f C_C %f\n", currentSensor.getCurrent(CurrentSensorMCU::U_C), currentSensor.getCurrent(CurrentSensorMCU::V_C), currentSensor.getCurrent(CurrentSensorMCU::W_C));
+            // printf("\x1b[32m[Main Thread]\x1b[39m enc: %f\n", encoder.getAngle());
+
+            // printf("e_cnt %8ld ", encoder.getTotalCnt());
+            // printf("t_v %5.2f ", bldcController.getTargetVelocity());
+            // printf("o_v %5.2f ", bldcController.getObservedVelocity());
+            // printf("p_time %4.2fus\n", process_time);
+
+            ////
+
+            // printf("encoder %ld ", encoder.getTotalCnt());
+            // printf("e_a %f ", angleProcessor.getElectricalAngle());
+            // printf("m_a %f ", angleProcessor.getMechanicalAngle());
+            // printf("v1 %f ", encoder.getVelocity());
+            // printf("rad/s %.2f ", bldcController.getObservedVelocity());
+            // printf("rpm %.2f ", bldcController.getObservedVelocity() * 60 / (2 * M_PI));
+            // printf("cnt20us %ld ", encoder.getCnt());
+
+            // float u, v, w;
+            // modulationProcessor.getDuty(u, v, w);
+            // printf("u: %.2f, v: %.2f, w: %.2f ", u, v, w);
+
+            // CurrentProcessor::PhaseCurrent_s current = currentProcessor.getPhaseCurrent();
+
+            // printf("uc: %.2f, vc: %.2f, wc: %.2f ", current.u, current.v, current.w);
+
+            // printf("a: %f b: %f ", currentProcessor.getAlphaBetaCurrent().alpha, currentProcessor.getAlphaBetaCurrent().beta);
+
+            // float t_qc, t_dc;
+
+            // bldcController.getTargetCurrent(t_qc, t_dc);
+
+            // printf("t_qc: %.2f t_dc: %.2f ", t_qc, t_dc);
+            // float vd;
+            // float vq;
+
+            // bldcController.getApplyVoltage(vq, vd);
+
+            // printf("vd: %.2f vq: %.2f ", vd, vq);
+            // printf("od: %.2f oq: %.2f ", currentProcessor.getDQCurrent().d, currentProcessor.getDQCurrent().q);
+
+            // printf("p_time %.2f\n", process_time);
+            // print_cnt = 0;
         }
     }
 }
@@ -131,7 +173,7 @@ void app_interrupt_20us() {  // 50kHz
         encoder.update1kHz();
         commandReceiver.cnt++;
         feedback_cnt++;
-        print_cnt++;
+        // print_cnt++;
         mode_cnt++;
         timer_1ms_cnt = 0;
     }
