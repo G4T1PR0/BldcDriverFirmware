@@ -47,6 +47,7 @@ void app_init() {
     encoder.init();
 
     angleProcessor.init();
+    angleProcessor.setDirection(true);
     modulationProcessor.init();
     currentProcessor.init();
 
@@ -109,14 +110,10 @@ void app_main() {
 
     while (1) {
         musicReceiver.update();
-        // commandReceiver.update();
-
-        // if (feedback_cnt > 5) {
-        //     commandReceiver.send();
-        // }
 
         // if (print_cnt > 50) {
         //     print_cnt = 0;
+        //     printf("encoder: %f\n", encoder.getAngle());
         // }
     }
 }
