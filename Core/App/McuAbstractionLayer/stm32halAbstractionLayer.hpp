@@ -12,7 +12,7 @@
 #include <McuAbstractionLayer/baseMcuAbstractionLayer.hpp>
 
 #define STM32_MAL_UART_BUFFER_SIZE 512
-#define STM32_MAL_ADC_BUFFER_SIZE 50
+#define STM32_MAL_ADC_BUFFER_SIZE 1
 #define STM32_MAL_MCU_MODEL_NUMBER H7x
 
 #if defined(__ICCARM__)
@@ -85,7 +85,7 @@ class stm32halAbstractionLayer : public baseMcuAbstractionLayer {
     // ADC
     void _initADC();
 
-    static uint16_t _data[3][3 * STM32_MAL_ADC_BUFFER_SIZE];
+    DMA_BUFFER static uint16_t _data[3][3 * STM32_MAL_ADC_BUFFER_SIZE];
 
     // Timer PWM
     void _initPWM();

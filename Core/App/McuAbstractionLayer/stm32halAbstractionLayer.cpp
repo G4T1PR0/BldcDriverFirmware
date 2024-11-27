@@ -61,6 +61,9 @@ stm32halAbstractionLayer::stm32halAbstractionLayer() {
     PAL.ADC_Connected[MAL::P_ADC::W_Current] = PeripheralAllocation::STM_ADC::ADC_3;
     PAL.ADC_INJECTED_RANK[MAL::P_ADC::W_Current] = 1;
 
+    PAL.ADC_Connected[MAL::P_ADC::Bus_Voltage] = PeripheralAllocation::STM_ADC::ADC_1;
+    PAL.ADC_RANK[MAL::P_ADC::Bus_Voltage] = 0;
+
     // PWM
     PAL.PWM_TIM[MAL::P_PWM::U_PWM] = &htim1;
     PAL.PWM_CH[MAL::P_PWM::U_PWM] = TIM_CHANNEL_1;
@@ -100,10 +103,24 @@ void stm32halAbstractionLayer::init() {
 }
 
 // ADC
-uint16_t stm32halAbstractionLayer::_data[PAL.STM_ADC::ADC_END][3 * STM32_MAL_ADC_BUFFER_SIZE] = {0};
+DMA_BUFFER uint16_t stm32halAbstractionLayer::_data[PAL.STM_ADC::ADC_END][3 * STM32_MAL_ADC_BUFFER_SIZE] = {0};
+
+DMA_BUFFER uint16_t _dd[3] = {0};
 
 void stm32halAbstractionLayer::_initADC(void) {
-    HAL_ADC_Start(PAL.ADC_Ins[PeripheralAllocation::STM_ADC::ADC_1]);
+    // if (HAL_ADC_Start_DMA(PAL.ADC_Ins[PeripheralAllocation::STM_ADC::ADC_1], (uint32_t*)this->_data[PeripheralAllocation::STM_ADC::ADC_1], 2 * STM32_MAL_ADC_BUFFER_SIZE) !=
+    //     HAL_OK) {
+    //     Error_Handler();
+    // }
+
+    if (HAL_ADC_Start_DMA(PAL.ADC_Ins[PeripheralAllocation::STM_ADC::ADC_1], (uint32_t*)_dd, 2) !=
+        HAL_OK) {
+        Error_Handler();
+    }
+
+    __HAL_DMA_DISABLE_IT(PAL.ADC_Ins[PeripheralAllocation::STM_ADC::ADC_1]->DMA_Handle, DMA_IT_TC | DMA_IT_HT);
+
+    // HAL_ADC_Start(PAL.ADC_Ins[PeripheralAllocation::STM_ADC::ADC_1]);
     HAL_ADC_Start(PAL.ADC_Ins[PeripheralAllocation::STM_ADC::ADC_2]);
     HAL_ADC_Start(PAL.ADC_Ins[PeripheralAllocation::STM_ADC::ADC_3]);
 
@@ -122,6 +139,9 @@ uint16_t stm32halAbstractionLayer::adcGetValue(P_ADC p) {
 
         case P_ADC::W_Current:
             return HAL_ADCEx_InjectedGetValue(PAL.ADC_Ins[PAL.ADC_Connected[W_Current]], PAL.ADC_INJECTED_RANK[W_Current]);
+
+        case P_ADC::Bus_Voltage:
+            return _dd[0];
 
         default:
             return 0;

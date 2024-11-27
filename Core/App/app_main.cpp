@@ -46,7 +46,7 @@ void app_init() {
     encoder.init();
 
     angleProcessor.init();
-    angleProcessor.setDirection(true);
+    // angleProcessor.setDirection(true);
     modulationProcessor.init();
     currentProcessor.init();
 
@@ -80,9 +80,9 @@ void app_main() {
 
     mcu.gpioSetValue(MAL::P_GPIO::Driver_Power_Switch, true);
 
-    // mcu.waitMs(500);
-    // bldcController.beep(2045, 0.1, 350);
-    // mcu.waitMs(500);
+    mcu.waitMs(500);
+    bldcController.beep(2045, 0.5, 350);
+    mcu.waitMs(500);
 
     printf("\x1b[32m[Main Thread]\x1b[39m Calibration Start\n");
 
@@ -93,22 +93,22 @@ void app_main() {
 
     printf("\x1b[32m[Main Thread]\x1b[39m Calibration End\n");
 
-    // mcu.waitMs(300);
-    // bldcController.beep(2045, 0.1, 250);
-    // mcu.waitMs(400);
-    // bldcController.beep(3500, 0.1, 100);
-    // mcu.waitMs(150);
-    // bldcController.beep(3500, 0.1, 100);
-    // mcu.waitMs(1000);
+    mcu.waitMs(300);
+    bldcController.beep(2045, 0.5, 250);
+    mcu.waitMs(400);
+    bldcController.beep(3500, 0.5, 100);
+    mcu.waitMs(150);
+    bldcController.beep(3500, 0.5, 100);
+    mcu.waitMs(1000);
 
     bldcController.setMode(BldcController::Mode::Stop);
 
     bldcController.setEnable(true);
     bldcController.setMode(BldcController::Mode::CurrentControl);
-    bldcController.setTargetCurrent(0.9, 0);
+    bldcController.setTargetCurrent(0.5, 0);
 
     // bldcController.setMode(BldcController::Mode::VoltageControl);
-    // bldcController.setTargetVoltage(3, 0);
+    // bldcController.setTargetVoltage(4, 0);
 
     while (1) {
         // commandReceiver.update();
@@ -129,6 +129,10 @@ void app_main() {
             // printf("p_time %4.2fus\n", process_time);
 
             ////
+
+            printf("b_vr: %f ", mcu.adcGetValue(MAL::P_ADC::Bus_Voltage) * 3.3f / (1 << 16));
+
+            printf("b_v: %f ", mcu.adcGetValue(MAL::P_ADC::Bus_Voltage) * 3.3f / (1 << 16) * 23.25 / 3.3);
 
             printf("encoder %ld ", encoder.getTotalCnt());
             // printf(">e_a: %f ", angleProcessor.getElectricalAngle());
