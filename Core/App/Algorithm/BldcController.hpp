@@ -45,8 +45,8 @@ class BldcController {
         _angleProcessor->update();
         _currentProcessor->update(_angleProcessor->getElectricalAngle());
 
-        LP_FILTER(_observed_current_d, _currentProcessor->getDQCurrent().d, 0.2);
-        LP_FILTER(_observed_current_q, _currentProcessor->getDQCurrent().q, 0.2);
+        LP_FILTER(_observed_current_d, _currentProcessor->getDQCurrent().d, 0.1);
+        LP_FILTER(_observed_current_q, _currentProcessor->getDQCurrent().q, 0.1);
 
         LP_FILTER(_observed_velocity, _angleProcessor->getVelocity(), 0.1);
 

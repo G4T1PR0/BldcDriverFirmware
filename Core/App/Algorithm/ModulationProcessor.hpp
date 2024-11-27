@@ -114,7 +114,7 @@ class ModulationProcessor {
     float _voltage_d;
     float _electric_angle;
 
-    float _voltage_limit = 12;
+    float _voltage_limit = 17;
 
     float _u_pwm;
     float _v_pwm;

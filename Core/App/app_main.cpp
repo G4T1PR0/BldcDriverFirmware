@@ -78,7 +78,7 @@ void app_init() {
 void app_main() {
     app_init();
 
-    mcu.gpioSetValue(MAL::P_GPIO::Driver_Power_Switch, true);
+    mcu.gpioSetValue(MAL::P_GPIO::Driver_Power_Switch, false);
 
     mcu.waitMs(500);
     bldcController.beep(2045, 0.5, 350);
@@ -103,9 +103,9 @@ void app_main() {
 
     bldcController.setMode(BldcController::Mode::Stop);
 
-    bldcController.setEnable(true);
-    bldcController.setMode(BldcController::Mode::CurrentControl);
-    bldcController.setTargetCurrent(0.5, 0);
+    // bldcController.setEnable(true);
+    // bldcController.setMode(BldcController::Mode::CurrentControl);
+    // bldcController.setTargetCurrent(0.5, 0);
 
     // bldcController.setMode(BldcController::Mode::VoltageControl);
     // bldcController.setTargetVoltage(4, 0);
@@ -125,12 +125,12 @@ void app_main() {
 
             // printf(">e_cnt: %ld ", encoder.getTotalCnt());
             // printf(">t_v: %5.2f ", bldcController.getTargetVelocity());
-            // printf(">o_v: %f ", bldcController.getObservedVelocity());
+            // printf("o_v: %f ", bldcController.getObservedVelocity());
             // printf("p_time %4.2fus\n", process_time);
 
             ////
 
-            printf("b_vr: %f ", mcu.adcGetValue(MAL::P_ADC::Bus_Voltage) * 3.3f / (1 << 16));
+            // printf("b_vr: %f ", mcu.adcGetValue(MAL::P_ADC::Bus_Voltage) * 3.3f / (1 << 16));
 
             printf("b_v: %f ", mcu.adcGetValue(MAL::P_ADC::Bus_Voltage) * 3.3f / (1 << 16) * 23.25 / 3.3);
 
@@ -138,8 +138,8 @@ void app_main() {
             // printf(">e_a: %f ", angleProcessor.getElectricalAngle());
             // printf(">m_a: %f ", angleProcessor.getMechanicalAngle());
             // printf("v1 %f ", encoder.getVelocity());
-            // printf("rad/s %.2f ", bldcController.getObservedVelocity());
-            // printf("rpm %.2f ", bldcController.getObservedVelocity() * 60 / (2 * M_PI));
+            printf("rad/s %.2f ", bldcController.getObservedVelocity());
+            printf("rpm %.2f ", bldcController.getObservedVelocity() * 60 / (2 * M_PI));
             // printf("cnt20us %ld ", encoder.getCnt());
 
             // float u, v, w;
