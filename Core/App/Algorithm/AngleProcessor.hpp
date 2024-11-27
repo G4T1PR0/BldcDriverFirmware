@@ -17,7 +17,7 @@ class AngleProcessor {
     }
 
     void init() {
-        _polePairs = 1;
+        _polePairs = 6;
         _direction = 0;
     }
 

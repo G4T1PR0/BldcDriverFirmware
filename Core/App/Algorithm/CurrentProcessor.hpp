@@ -71,9 +71,12 @@ class CurrentProcessor {
     const float _2_sqrt3 = 2.0f / sqrt(3);
 
     AlphaBetaCurrent_s _clarkeTransform(PhaseCurrent_s phaseCurrent) {
-        float mid = (1.0f / 3.0f) * (phaseCurrent.u + phaseCurrent.v + phaseCurrent.w);
-        float a = phaseCurrent.u - mid;
-        float b = phaseCurrent.v - mid;
+        // float mid = (1.0f / 3.0f) * (phaseCurrent.u + phaseCurrent.v + phaseCurrent.w);
+        // float a = phaseCurrent.u - mid;
+        // float b = phaseCurrent.v - mid;
+
+        float a = phaseCurrent.u;
+        float b = phaseCurrent.v;
 
         AlphaBetaCurrent_s abCurrent;
         abCurrent.alpha = a;

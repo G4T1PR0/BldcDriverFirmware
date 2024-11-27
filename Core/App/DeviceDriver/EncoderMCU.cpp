@@ -15,7 +15,7 @@ EncoderMCU::EncoderMCU(MAL* mcu, MAL::P_Encoder encoder) {
 void EncoderMCU::init() {
     _cnt = 0;
     _total_cnt = 0;
-    _cpr = 2048;
+    _cpr = 8192;
 
     _mcu->encoderSetCnt(_encoder, 0);
 }

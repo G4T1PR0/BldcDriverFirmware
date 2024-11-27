@@ -35,8 +35,8 @@ class BldcController {
     };
 
     void init() {
-        _pid_current_q.setPID(48, 0, 0);
-        _pid_current_d.setPID(48, 0, 0);
+        _pid_current_q.setPID(5, 0, 0);
+        _pid_current_d.setPID(5, 0, 0);
 
         _pid_velocity.setPID(0.015, 0.000005, 0);
     }
@@ -45,8 +45,8 @@ class BldcController {
         _angleProcessor->update();
         _currentProcessor->update(_angleProcessor->getElectricalAngle());
 
-        LP_FILTER(_observed_current_d, _currentProcessor->getDQCurrent().d, 0.01);
-        LP_FILTER(_observed_current_q, _currentProcessor->getDQCurrent().q, 0.01);
+        LP_FILTER(_observed_current_d, _currentProcessor->getDQCurrent().d, 0.2);
+        LP_FILTER(_observed_current_q, _currentProcessor->getDQCurrent().q, 0.2);
 
         LP_FILTER(_observed_velocity, _angleProcessor->getVelocity(), 0.1);
 
@@ -55,7 +55,7 @@ class BldcController {
                 break;
 
             case Mode::Calibration1: {
-                _modulationProcessor->setVoltage(5, 0, _calib_e_angle);
+                _modulationProcessor->setVoltage(0.5, 0, _calib_e_angle);
                 _calib_e_angle += 0.00005;
                 if (_calib_e_angle >= M_PI * 3 / 2) {
                     _modulationProcessor->setVoltage(5, 0, M_PI * 3 / 2);
@@ -64,7 +64,7 @@ class BldcController {
             } break;
 
             case Mode::Calibration2:
-                _modulationProcessor->setVoltage(5, 0, M_PI * 3 / 2);
+                _modulationProcessor->setVoltage(0.5, 0, M_PI * 3 / 2);
 
                 calib_cnt++;
                 if (calib_cnt > 1500 * 50) {
@@ -73,7 +73,7 @@ class BldcController {
                 break;
 
             case Calibration3:
-                _modulationProcessor->setVoltage(5, 0, M_PI * 3 / 2);
+                _modulationProcessor->setVoltage(0.5, 0, M_PI * 3 / 2);
                 _angleProcessor->setZero();
                 _mode = Mode::Stop;
                 break;
