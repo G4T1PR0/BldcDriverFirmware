@@ -23,9 +23,20 @@ class AngleProcessor {
 
     void update() {
         _encoder->update();
-        _mechanicalAngle = _encoder->getAngle();
+
+        if (_direction) {
+            _mechanicalAngle = -_encoder->getAngle();
+        } else {
+            _mechanicalAngle = _encoder->getAngle();
+        }
+
         _electricalAngle = _calcElectricalAngle();
-        _velocity = _encoder->getVelocity();
+
+        if (_direction) {
+            _velocity = -_encoder->getVelocity();
+        } else {
+            _velocity = _encoder->getVelocity();
+        }
     }
 
     float getMechanicalAngle() {
@@ -66,11 +77,7 @@ class AngleProcessor {
     float _velocity = 0;
 
     float _calcElectricalAngle() {
-        if (_direction) {
-            return _normalizeAngle(-1 * _polePairs * _mechanicalAngle - _zero_electrical_angle);
-        } else {
-            return _normalizeAngle(_polePairs * _mechanicalAngle - _zero_electrical_angle);
-        }
+        return _normalizeAngle(_polePairs * _mechanicalAngle - _zero_electrical_angle);
     }
 
     float _normalizeAngle(float angle) {

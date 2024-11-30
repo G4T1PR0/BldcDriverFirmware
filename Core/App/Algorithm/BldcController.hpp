@@ -55,16 +55,16 @@ class BldcController {
                 break;
 
             case Mode::Calibration1: {
-                _modulationProcessor->setVoltage(0.5, 0, _calib_e_angle);
+                _modulationProcessor->setVoltage(1.7, 0, _calib_e_angle);
                 _calib_e_angle += 0.00005;
                 if (_calib_e_angle >= M_PI * 3 / 2) {
-                    _modulationProcessor->setVoltage(5, 0, M_PI * 3 / 2);
+                    _modulationProcessor->setVoltage(1.7, 0, M_PI * 3 / 2);
                     _mode = Mode::Calibration2;
                 }
             } break;
 
             case Mode::Calibration2:
-                _modulationProcessor->setVoltage(0.5, 0, M_PI * 3 / 2);
+                _modulationProcessor->setVoltage(1.7, 0, M_PI * 3 / 2);
 
                 calib_cnt++;
                 if (calib_cnt > 1500 * 50) {
@@ -73,7 +73,7 @@ class BldcController {
                 break;
 
             case Calibration3:
-                _modulationProcessor->setVoltage(0.5, 0, M_PI * 3 / 2);
+                _modulationProcessor->setVoltage(1.7, 0, M_PI * 3 / 2);
                 _angleProcessor->setZero();
                 _mode = Mode::Stop;
                 break;

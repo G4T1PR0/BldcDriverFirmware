@@ -46,7 +46,7 @@ void app_init() {
     encoder.init();
 
     angleProcessor.init();
-    // angleProcessor.setDirection(true);
+    angleProcessor.setDirection(true);
     modulationProcessor.init();
     currentProcessor.init();
 
@@ -78,7 +78,19 @@ void app_init() {
 void app_main() {
     app_init();
 
+    // while (1) {
+    //     printf("test1\n");
+    //     mcu.waitMs(1000);
+    // }
+
+    // mcu.waitMs(5000);
+
     mcu.gpioSetValue(MAL::P_GPIO::Driver_Power_Switch, false);
+
+    // while (1) {
+    //     printf("test2\n");
+    //     mcu.waitMs(1000);
+    // }
 
     mcu.waitMs(500);
     bldcController.beep(2045, 0.5, 350);
@@ -107,10 +119,49 @@ void app_main() {
     // bldcController.setMode(BldcController::Mode::CurrentControl);
     // bldcController.setTargetCurrent(0.5, 0);
 
+    // bldcController.setEnable(true);
     // bldcController.setMode(BldcController::Mode::VoltageControl);
-    // bldcController.setTargetVoltage(4, 0);
+    // bldcController.setTargetVoltage(1, 0);
+
+    int mode = 0;
 
     while (1) {
+        // switch (mode) {
+        //     case 0:
+        //         bldcController.setEnable(true);
+        //         bldcController.setTargetCurrent(1.2, 0);
+        //         if (angleProcessor.getMechanicalAngle() > 1000) {
+        //             mode = 1;
+        //         }
+        //         break;
+
+        //     case 1:
+        //         bldcController.setEnable(false);
+        //         if (bldcController.getObservedVelocity() < 10) {
+        //             mode = 2;
+        //         }
+        //         break;
+
+        //     case 2:
+        //         bldcController.setEnable(true);
+        //         bldcController.setTargetCurrent(-1.2, 0);
+        //         if (angleProcessor.getMechanicalAngle() < -1000) {
+        //             mode = 3;
+        //         }
+
+        //         break;
+
+        //     case 3:
+        //         bldcController.setEnable(false);
+        //         if (bldcController.getObservedVelocity() > -10) {
+        //             mode = 0;
+        //         }
+        //         break;
+
+        //     default:
+        //         break;
+        // }
+
         // commandReceiver.update();
 
         // if (feedback_cnt > 5) {
@@ -132,11 +183,13 @@ void app_main() {
 
             // printf("b_vr: %f ", mcu.adcGetValue(MAL::P_ADC::Bus_Voltage) * 3.3f / (1 << 16));
 
+            printf("mode: %d ", mode);
+
             printf("b_v: %f ", mcu.adcGetValue(MAL::P_ADC::Bus_Voltage) * 3.3f / (1 << 16) * 23.25 / 3.3);
 
             printf("encoder %ld ", encoder.getTotalCnt());
             // printf(">e_a: %f ", angleProcessor.getElectricalAngle());
-            // printf(">m_a: %f ", angleProcessor.getMechanicalAngle());
+            printf(">m_a: %f ", angleProcessor.getMechanicalAngle());
             // printf("v1 %f ", encoder.getVelocity());
             printf("rad/s %.2f ", bldcController.getObservedVelocity());
             printf("rpm %.2f ", bldcController.getObservedVelocity() * 60 / (2 * M_PI));
