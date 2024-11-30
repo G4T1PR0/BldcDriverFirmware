@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <math.h>
 #include <DeviceDriver/Interface/baseCurrentSensor.hpp>
 #include <DeviceDriver/Interface/baseDCMotorDriver.hpp>
 #include <DeviceDriver/Interface/baseEncoder.hpp>

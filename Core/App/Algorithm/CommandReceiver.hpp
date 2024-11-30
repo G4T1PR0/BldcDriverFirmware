@@ -7,15 +7,15 @@
 
 #pragma once
 
-#include <Algorithm/bldcController.hpp>
+#include <Algorithm/dcMotorController.hpp>
 #include <McuAbstractionLayer/baseMcuAbstractionLayer.hpp>
 
 class CommandReceiver {
    public:
-    CommandReceiver(baseMcuAbstractionLayer* mcu, baseMcuAbstractionLayer::P_UART uart, BldcController* bldcController) {
+    CommandReceiver(baseMcuAbstractionLayer* mcu, baseMcuAbstractionLayer::P_UART uart, DcMotorController* dcMotorController) {
         _mcu = mcu;
         _uart = uart;
-        _bldcController = bldcController;
+        _dcMotorController = dcMotorController;
 
         _receiverModeTargetValue.d.header[0] = 0xFF;
         _receiverModeTargetValue.d.header[1] = 0xFF;
@@ -39,10 +39,10 @@ class CommandReceiver {
         _motorStatusFeedback.d.header[3] = 0x00;
         _motorStatusFeedback.d.packet_id = _feedback_packet_id::MotorStatus;
 
-        _motorStatusFeedback.d.mode = _bldcController->getMode();
-        _motorStatusFeedback.d.voltage = _bldcController->getApplyQVoltage();
-        _motorStatusFeedback.d.torque = _bldcController->getObservedCurrentQ();
-        _motorStatusFeedback.d.velocity = _bldcController->getObservedVelocity();
+        _motorStatusFeedback.d.mode = _dcMotorController->getMode();
+        _motorStatusFeedback.d.voltage = _dcMotorController->getApplyVoltage();
+        _motorStatusFeedback.d.torque = _dcMotorController->getObservedCurrent();
+        _motorStatusFeedback.d.velocity = _dcMotorController->getObservedVelocity();
 
         _motorStatusFeedback.d.crc = _mcu->crc32(_motorStatusFeedback.b, sizeof(_motorStatusFeedback_t) - sizeof(uint32_t));
 
@@ -186,27 +186,27 @@ class CommandReceiver {
                         // printf("mode %d\n", _mode);
                         switch (_mode) {
                             case Stop:
-                                _bldcController->setMode(BldcController::Mode::Stop);
+                                _dcMotorController->setMode(DcMotorController::Mode::Stop);
                                 break;
 
                             case VoltageControl:
-                                _bldcController->setMode(BldcController::Mode::VoltageControl);
-                                _bldcController->setTargetVoltage(_receiverModeTargetValue.d.target, 0);
+                                _dcMotorController->setMode(DcMotorController::Mode::VoltageControl);
+                                _dcMotorController->setTargetDuty(_receiverModeTargetValue.d.target);
                                 break;
 
                             case TorqueControl:
-                                _bldcController->setMode(BldcController::Mode::CurrentControl);
-                                _bldcController->setTargetCurrent(_receiverModeTargetValue.d.target, 0);
+                                _dcMotorController->setMode(DcMotorController::Mode::CurrentControl);
+                                _dcMotorController->setTargetCurrent(_receiverModeTargetValue.d.target);
                                 break;
 
                             case VelocityControl:
-                                _bldcController->setMode(BldcController::Mode::VelocityControl);
-                                _bldcController->setTargetVelocity(_receiverModeTargetValue.d.target);
+                                _dcMotorController->setMode(DcMotorController::Mode::VelocityControl);
+                                _dcMotorController->setTargetVelocity(_receiverModeTargetValue.d.target);
                                 break;
 
                             default:
                                 printf("mode error\n");
-                                _bldcController->setMode(BldcController::Mode::Stop);
+                                _dcMotorController->setMode(DcMotorController::Mode::Stop);
                                 break;
                         }
                         break;
@@ -235,12 +235,12 @@ class CommandReceiver {
                 cnt = 0;
                 switch (_oneShotCommand.d.packet_id) {
                     case SystemReset:
-                        _bldcController->setMode(BldcController::Mode::Stop);
+                        _dcMotorController->setMode(DcMotorController::Mode::Stop);
                         _mcu->systemReset();
                         break;
 
                     case EnterBootLoader:
-                        _bldcController->setMode(BldcController::Mode::Stop);
+                        _dcMotorController->setMode(DcMotorController::Mode::Stop);
                         _mcu->enterBootloader();
                         break;
 
@@ -253,16 +253,16 @@ class CommandReceiver {
             _rx_complete_oneshot = false;
         }
         if (cnt > 100) {
-            _bldcController->setEnable(false);
+            _dcMotorController->setEnable(false);
         } else {
-            _bldcController->setEnable(true);
+            _dcMotorController->setEnable(true);
         }
     }
 
    private:
     baseMcuAbstractionLayer* _mcu;
     baseMcuAbstractionLayer::P_UART _uart;
-    BldcController* _bldcController;
+    DcMotorController* _dcMotorController;
 
     enum _Mode {
         Stop,

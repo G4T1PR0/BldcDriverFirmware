@@ -22,7 +22,7 @@ DCMotorDriverMCU driver(&mcu, MAL::P_PWM::U_PWM, MAL::P_PWM::V_PWM);
 EncoderMCU encoder(&mcu, MAL::P_Encoder::Main_Encoder);
 
 DcMotorController dcMotorController(&driver, &currentSensor, &encoder);
-// CommandReceiver commandReceiver(&mcu, MAL::P_UART::Controller, &bldcController);
+CommandReceiver commandReceiver(&mcu, MAL::P_UART::Controller, &dcMotorController);
 
 unsigned int feedback_cnt = 0;
 unsigned int print_cnt = 0;
@@ -71,32 +71,28 @@ void app_main() {
 
     driver.enable(true);
     mcu.waitMs(300);
-    dcMotorController.beep(2045, 0.2, 250);
+    dcMotorController.beep(2045, 0.02, 250);
     mcu.waitMs(400);
-    dcMotorController.beep(3500, 0.2, 100);
+    dcMotorController.beep(3500, 0.02, 100);
     mcu.waitMs(150);
-    dcMotorController.beep(3500, 0.2, 100);
+    dcMotorController.beep(3500, 0.02, 100);
     mcu.waitMs(1000);
 
     dcMotorController.setMode(DcMotorController::Mode::Stop);
 
-    // bldcController.setEnable(true);
-    // bldcController.setMode(BldcController::Mode::CurrentControl);
-    // bldcController.setTargetCurrent(0.5, 0);
-
     // mcu.pwmSetDuty(MAL::P_PWM::U_PWM, 0.95);
     // mcu.pwmSetDuty(MAL::P_PWM::V_PWM, 0.05);
 
-    driver.enable(true);
-    dcMotorController.setMode(DcMotorController::Mode::CurrentControl);
-    dcMotorController.setEnable(true);
-    dcMotorController.setTargetCurrent(0.4);
+    // driver.enable(true);
+    // dcMotorController.setMode(DcMotorController::Mode::CurrentControl);
+    // dcMotorController.setEnable(true);
+    // dcMotorController.setTargetCurrent(0.4);
 
     while (1) {
-        // commandReceiver.update();
+        commandReceiver.update();
 
         if (feedback_cnt > 5) {
-            // commandReceiver.send();
+            commandReceiver.send();
         }
 
         if (print_cnt > 100) {
@@ -114,7 +110,7 @@ void app_interrupt_20us() {  // 50kHz
     timer_1ms_cnt++;
     if (timer_1ms_cnt >= 50) {  // 1kHz
         encoder.update1kHz();
-        // commandReceiver.cnt++;
+        commandReceiver.cnt++;
         feedback_cnt++;
         print_cnt++;
         mode_cnt++;
