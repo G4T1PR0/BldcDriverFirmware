@@ -70,13 +70,13 @@ void app_main() {
     mcu.gpioSetValue(MAL::P_GPIO::Driver_Power_Switch, true);
 
     driver.enable(true);
-    mcu.waitMs(300);
-    dcMotorController.beep(2045, 0.02, 250);
-    mcu.waitMs(400);
-    dcMotorController.beep(3500, 0.02, 100);
-    mcu.waitMs(150);
-    dcMotorController.beep(3500, 0.02, 100);
-    mcu.waitMs(1000);
+    // mcu.waitMs(300);
+    // dcMotorController.beep(2045, 0.02, 250);
+    // mcu.waitMs(400);
+    // dcMotorController.beep(3500, 0.02, 100);
+    // mcu.waitMs(150);
+    // dcMotorController.beep(3500, 0.02, 100);
+    // mcu.waitMs(1000);
 
     dcMotorController.setMode(DcMotorController::Mode::Stop);
 

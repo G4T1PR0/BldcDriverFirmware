@@ -107,9 +107,11 @@ class DcMotorController {
                     if (_beep_cnt_c > (50 / _beep_freq * 1000)) {
                         _beep_cnt_c = 0;
                     } else if (_beep_cnt_c > (50 / _beep_freq * 1000) * 0.5) {
-                        _duty = _pid_current.update(_beep_current, _observed_current);
+                        // _duty = _pid_current.update(_beep_current, _observed_current);
+                        _duty = 0.001;
                     } else {
-                        _duty = _pid_current.update(-_beep_current, _observed_current);
+                        // _duty = _pid_current.update(-_beep_current, _observed_current);
+                        _duty = -0.001;
                     }
 
                     if (_duty > 0.5) {
