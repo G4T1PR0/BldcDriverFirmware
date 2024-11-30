@@ -115,9 +115,9 @@ void app_main() {
 
     bldcController.setMode(BldcController::Mode::Stop);
 
-    // bldcController.setEnable(true);
-    // bldcController.setMode(BldcController::Mode::CurrentControl);
-    // bldcController.setTargetCurrent(0.5, 0);
+    bldcController.setEnable(true);
+    bldcController.setMode(BldcController::Mode::CurrentControl);
+    bldcController.setTargetCurrent(0.5, 0);
 
     // bldcController.setEnable(true);
     // bldcController.setMode(BldcController::Mode::VoltageControl);
@@ -126,47 +126,47 @@ void app_main() {
     int mode = 0;
 
     while (1) {
-        // switch (mode) {
-        //     case 0:
-        //         bldcController.setEnable(true);
-        //         bldcController.setTargetCurrent(1.2, 0);
-        //         if (angleProcessor.getMechanicalAngle() > 1000) {
-        //             mode = 1;
-        //         }
-        //         break;
-
-        //     case 1:
-        //         bldcController.setEnable(false);
-        //         if (bldcController.getObservedVelocity() < 10) {
-        //             mode = 2;
-        //         }
-        //         break;
-
-        //     case 2:
-        //         bldcController.setEnable(true);
-        //         bldcController.setTargetCurrent(-1.2, 0);
-        //         if (angleProcessor.getMechanicalAngle() < -1000) {
-        //             mode = 3;
-        //         }
-
-        //         break;
-
-        //     case 3:
-        //         bldcController.setEnable(false);
-        //         if (bldcController.getObservedVelocity() > -10) {
-        //             mode = 0;
-        //         }
-        //         break;
-
-        //     default:
-        //         break;
-        // }
-
         // commandReceiver.update();
 
         // if (feedback_cnt > 5) {
         //     commandReceiver.send();
         // }
+
+        switch (mode) {
+            case 0:
+                bldcController.setEnable(true);
+                bldcController.setTargetCurrent(1.2, 0);
+                if (angleProcessor.getMechanicalAngle() > 1000) {
+                    mode = 1;
+                }
+                break;
+
+            case 1:
+                bldcController.setEnable(false);
+                if (bldcController.getObservedVelocity() < 10) {
+                    mode = 2;
+                }
+                break;
+
+            case 2:
+                bldcController.setEnable(true);
+                bldcController.setTargetCurrent(-1.2, 0);
+                if (angleProcessor.getMechanicalAngle() < -1000) {
+                    mode = 3;
+                }
+
+                break;
+
+            case 3:
+                bldcController.setEnable(false);
+                if (bldcController.getObservedVelocity() > -10) {
+                    mode = 0;
+                }
+                break;
+
+            default:
+                break;
+        }
 
         if (print_cnt > 50) {
             // printf("\x1b[32m[Main Thread]\x1b[39m p_time: %f\n", process_time);
@@ -187,17 +187,13 @@ void app_main() {
 
             printf("b_v: %f ", mcu.adcGetValue(MAL::P_ADC::Bus_Voltage) * 3.3f / (1 << 16) * 23.25 / 3.3);
 
-            printf("encoder %ld ", encoder.getTotalCnt());
+            printf("enc %ld ", encoder.getTotalCnt());
             // printf(">e_a: %f ", angleProcessor.getElectricalAngle());
-            printf(">m_a: %f ", angleProcessor.getMechanicalAngle());
+            printf("m_a: %f ", angleProcessor.getMechanicalAngle());
             // printf("v1 %f ", encoder.getVelocity());
             printf("rad/s %.2f ", bldcController.getObservedVelocity());
             printf("rpm %.2f ", bldcController.getObservedVelocity() * 60 / (2 * M_PI));
             // printf("cnt20us %ld ", encoder.getCnt());
-
-            // float u, v, w;
-            // modulationProcessor.getDuty(u, v, w);
-            // printf(">u_duty: %.2f >v_duty: %.2f >w_duty: %.2f ", u, v, w);
 
             // CurrentProcessor::PhaseCurrent_s current = currentProcessor.getPhaseCurrent();
 
@@ -216,10 +212,14 @@ void app_main() {
 
             bldcController.getApplyVoltage(vq, vd);
 
-            printf("d_voltage: %.2f q_voltage: %.2f ", vd, vq);
-            printf("d_o_current: %.2f q_o_current: %.2f ", currentProcessor.getDQCurrent().d, currentProcessor.getDQCurrent().q);
+            printf("d_v: %.2f q_v: %.2f ", vd, vq);
+            printf("d_o_c: %.2f q_o_ct: %.2f ", currentProcessor.getDQCurrent().d, currentProcessor.getDQCurrent().q);
 
-            printf("p_time: %.2f\n", process_time);
+            printf("p_t: %.2f\n", process_time);
+
+            // float u, v, w;
+            // modulationProcessor.getDuty(u, v, w);
+            // printf("u_duty: %.2f v_duty: %.2f w_duty: %.2f \n", u, v, w);
 
             // Teleplot
 
