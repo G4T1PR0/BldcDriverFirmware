@@ -109,9 +109,9 @@ void app_main() {
 
     bldcController.setMode(BldcController::Mode::Stop);
 
-    bldcController.setEnable(true);
-    bldcController.setMode(BldcController::Mode::CurrentControl);
-    bldcController.setTargetCurrent(0.5, 0);
+    // bldcController.setEnable(true);
+    // bldcController.setMode(BldcController::Mode::CurrentControl);
+    // bldcController.setTargetCurrent(0.5, 0);
 
     // bldcController.setEnable(true);
     // bldcController.setMode(BldcController::Mode::VoltageControl);
@@ -120,11 +120,11 @@ void app_main() {
     int mode = 0;
 
     while (1) {
-        // commandReceiver.update();
+        commandReceiver.update();
 
-        // if (feedback_cnt > 5) {
-        //     commandReceiver.send();
-        // }
+        if (feedback_cnt > 5) {
+            commandReceiver.send();
+        }
 
         switch (mode) {
             case 0:
@@ -255,7 +255,7 @@ void app_interrupt_20us() {  // 50kHz
         encoder.update1kHz();
         commandReceiver.cnt++;
         feedback_cnt++;
-        print_cnt++;
+        // print_cnt++;
         mode_cnt++;
         timer_1ms_cnt = 0;
     }
