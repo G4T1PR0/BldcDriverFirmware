@@ -126,42 +126,6 @@ void app_main() {
             commandReceiver.send();
         }
 
-        switch (mode) {
-            case 0:
-                bldcController.setEnable(true);
-                bldcController.setTargetCurrent(1.2, 0);
-                if (angleProcessor.getMechanicalAngle() > 1000) {
-                    mode = 1;
-                }
-                break;
-
-            case 1:
-                bldcController.setEnable(false);
-                if (bldcController.getObservedVelocity() < 10) {
-                    mode = 2;
-                }
-                break;
-
-            case 2:
-                bldcController.setEnable(true);
-                bldcController.setTargetCurrent(-1.2, 0);
-                if (angleProcessor.getMechanicalAngle() < -1000) {
-                    mode = 3;
-                }
-
-                break;
-
-            case 3:
-                bldcController.setEnable(false);
-                if (bldcController.getObservedVelocity() > -10) {
-                    mode = 0;
-                }
-                break;
-
-            default:
-                break;
-        }
-
         if (print_cnt > 50) {
             // printf("\x1b[32m[Main Thread]\x1b[39m p_time: %f\n", process_time);
             // printf("\x1b[32m[Main Thread]\x1b[39m Mode: %d\n", bldcController.getMode());
