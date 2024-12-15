@@ -7,6 +7,7 @@ add_library(stm32cubemx INTERFACE)
 enable_language(C ASM)
 
 target_compile_definitions(stm32cubemx INTERFACE 
+	USE_PWR_LDO_SUPPLY 
 	USE_HAL_DRIVER 
 	STM32H723xx
     $<$<CONFIG:Debug>:DEBUG>

@@ -71,26 +71,17 @@ class CurrentProcessor {
     const float _2_sqrt3 = 2.0f / sqrt(3);
 
     AlphaBetaCurrent_s _clarkeTransform(PhaseCurrent_s phaseCurrent) {
-        // float mid = (1.0f / 3.0f) * (phaseCurrent.u + phaseCurrent.v + phaseCurrent.w);
-        // float a = phaseCurrent.u - mid;
-        // float b = phaseCurrent.v - mid;
+        float mid = (1.0f / 3.0f) * (phaseCurrent.u + phaseCurrent.v + phaseCurrent.w);
+        float a = phaseCurrent.u - mid;
+        float b = phaseCurrent.v - mid;
 
-        float a = phaseCurrent.u;
-        float b = phaseCurrent.v;
+        // float a = phaseCurrent.u;
+        // float b = phaseCurrent.v;
 
         AlphaBetaCurrent_s abCurrent;
         abCurrent.alpha = a;
         abCurrent.beta = _1_sqrt3 * a + _2_sqrt3 * b;
         return abCurrent;
-
-        // float a = phaseCurrent.u;
-        // float b = phaseCurrent.v;
-        // float c = phaseCurrent.w;
-
-        // AlphaBetaCurrent_s abCurrent;
-        // abCurrent.alpha = (2.0 / 3.0) * a - (1.0 / 3.0) * b - (1.0 / 3.0) * c;
-        // abCurrent.beta = _1_sqrt3 * b - _1_sqrt3 * c;
-        // return abCurrent;
     }
 
     DQCurrent_s _parkTransform(AlphaBetaCurrent_s alphaBetaCurrent, float electricalAngle) {

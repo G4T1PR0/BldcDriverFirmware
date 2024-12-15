@@ -72,19 +72,7 @@ void app_init() {
 void app_main() {
     app_init();
 
-    // while (1) {
-    //     printf("test1\n");
-    //     mcu.waitMs(1000);
-    // }
-
-    // mcu.waitMs(5000);
-
-    mcu.gpioSetValue(MAL::P_GPIO::Driver_Power_Switch, false);
-
-    // while (1) {
-    //     printf("test2\n");
-    //     mcu.waitMs(1000);
-    // }
+    mcu.gpioSetValue(MAL::P_GPIO::Driver_Power_Switch, true);
 
     mcu.waitMs(500);
     bldcController.beep(2045, 0.5, 350);
@@ -109,22 +97,22 @@ void app_main() {
 
     bldcController.setMode(BldcController::Mode::Stop);
 
-    // bldcController.setEnable(true);
-    // bldcController.setMode(BldcController::Mode::CurrentControl);
-    // bldcController.setTargetCurrent(0.5, 0);
+    bldcController.setEnable(true);
+    bldcController.setMode(BldcController::Mode::CurrentControl);
+    bldcController.setTargetCurrent(0, 0.5);
 
     // bldcController.setEnable(true);
     // bldcController.setMode(BldcController::Mode::VoltageControl);
-    // bldcController.setTargetVoltage(1, 0);
+    // bldcController.setTargetVoltage(4, 0);
 
     int mode = 0;
 
     while (1) {
-        commandReceiver.update();
+        // commandReceiver.update();
 
-        if (feedback_cnt > 5) {
-            commandReceiver.send();
-        }
+        // if (feedback_cnt > 5) {
+        //     commandReceiver.send();
+        // }
 
         if (print_cnt > 50) {
             // printf("\x1b[32m[Main Thread]\x1b[39m p_time: %f\n", process_time);
@@ -143,14 +131,14 @@ void app_main() {
 
             printf("mode: %d ", mode);
 
-            printf("b_v: %f ", mcu.adcGetValue(MAL::P_ADC::Bus_Voltage) * 3.3f / (1 << 16) * 23.25 / 3.3);
+            // printf("b_v: %f ", mcu.adcGetValue(MAL::P_ADC::Bus_Voltage) * 3.3f / (1 << 16) * 23.25 / 3.3);
 
-            printf("enc %ld ", encoder.getTotalCnt());
-            // printf(">e_a: %f ", angleProcessor.getElectricalAngle());
-            printf("m_a: %f ", angleProcessor.getMechanicalAngle());
-            // printf("v1 %f ", encoder.getVelocity());
-            printf("rad/s %.2f ", bldcController.getObservedVelocity());
-            printf("rpm %.2f ", bldcController.getObservedVelocity() * 60 / (2 * M_PI));
+            // printf("enc %ld ", encoder.getTotalCnt());
+            // // printf(">e_a: %f ", angleProcessor.getElectricalAngle());
+            // printf("m_a: %f ", angleProcessor.getMechanicalAngle());
+            // // printf("v1 %f ", encoder.getVelocity());
+            // printf("rad/s %.2f ", bldcController.getObservedVelocity());
+            // printf("rpm %.2f ", bldcController.getObservedVelocity() * 60 / (2 * M_PI));
             // printf("cnt20us %ld ", encoder.getCnt());
 
             // CurrentProcessor::PhaseCurrent_s current = currentProcessor.getPhaseCurrent();
@@ -173,11 +161,11 @@ void app_main() {
             printf("d_v: %.2f q_v: %.2f ", vd, vq);
             printf("d_o_c: %.2f q_o_ct: %.2f ", currentProcessor.getDQCurrent().d, currentProcessor.getDQCurrent().q);
 
-            printf("p_t: %.2f\n", process_time);
+            float u, v, w;
+            modulationProcessor.getDuty(u, v, w);
+            printf("u_duty: %.2f v_duty: %.2f w_duty: %.2f \n", u, v, w);
 
-            // float u, v, w;
-            // modulationProcessor.getDuty(u, v, w);
-            // printf("u_duty: %.2f v_duty: %.2f w_duty: %.2f \n", u, v, w);
+            printf("p_t: %.2f\n", process_time);
 
             // Teleplot
 
@@ -219,7 +207,7 @@ void app_interrupt_20us() {  // 50kHz
         encoder.update1kHz();
         commandReceiver.cnt++;
         feedback_cnt++;
-        // print_cnt++;
+        print_cnt++;
         mode_cnt++;
         timer_1ms_cnt = 0;
     }

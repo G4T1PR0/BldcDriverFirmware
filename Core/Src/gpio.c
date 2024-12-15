@@ -55,14 +55,14 @@ void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(Vdrive_Switch_GPIO_Port, Vdrive_Switch_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : PtPin */
+  /*Configure GPIO pin : Vdrive_Switch_Pin */
   GPIO_InitStruct.Pin = Vdrive_Switch_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(Vdrive_Switch_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PDPin PDPin PDPin */
+  /*Configure GPIO pins : HallSens_W_Pin HallSens_V_Pin HallSens_U_Pin */
   GPIO_InitStruct.Pin = HallSens_W_Pin|HallSens_V_Pin|HallSens_U_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
