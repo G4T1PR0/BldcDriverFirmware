@@ -13,6 +13,7 @@
 #include <Lib/pid.hpp>
 
 #define LP_FILTER(value, sample, filter_constant) (value -= (filter_constant) * ((value) - (sample)))
+#define _constrain(amt, low, high) ((amt) < (low) ? (low) : ((amt) > (high) ? (high) : (amt)))
 
 class BldcController {
    public:
@@ -35,122 +36,61 @@ class BldcController {
     };
 
     void init() {
-        _pid_current_q.setPID(5, 0, 0);
-        _pid_current_d.setPID(5, 0, 0);
+        _pid_current_q.setPID(0.1, 0, 0);
+        _pid_current_d.setPID(0.1, 0, 0);
 
         _pid_velocity.setPID(0.015, 0.000005, 0);
+
+        _modulationProcessor->setInjectionVoltage(_hfi_voltage);
     }
 
     void update() {
-        _angleProcessor->update();
-        _currentProcessor->update(_angleProcessor->getElectricalAngle());
+        _injection_polarity = !_injection_polarity;
+        _modulationProcessor->setInjectionPolarity(_injection_polarity);
+        _currentProcessor->setInjectionPolarity(_injection_polarity);
+
+        _currentProcessor->update(_electrical_angle);
 
         LP_FILTER(_observed_current_d, _currentProcessor->getDQCurrent().d, 0.1);
         LP_FILTER(_observed_current_q, _currentProcessor->getDQCurrent().q, 0.1);
 
         LP_FILTER(_observed_velocity, _angleProcessor->getVelocity(), 0.1);
 
-        switch (_mode) {
-            case Mode::UnInitilized:
-                break;
-
-            case Mode::Calibration1: {
-                _modulationProcessor->setVoltage(1.7, 0, _calib_e_angle);
-                _calib_e_angle += 0.00005;
-                if (_calib_e_angle >= M_PI * 3 / 2) {
-                    _modulationProcessor->setVoltage(1.7, 0, M_PI * 3 / 2);
-                    _mode = Mode::Calibration2;
-                }
-            } break;
-
-            case Mode::Calibration2:
-                _modulationProcessor->setVoltage(1.7, 0, M_PI * 3 / 2);
-
-                calib_cnt++;
-                if (calib_cnt > 1500 * 50) {
-                    _mode = Mode::Calibration3;
-                }
-                break;
-
-            case Calibration3:
-                _modulationProcessor->setVoltage(1.7, 0, M_PI * 3 / 2);
-                _angleProcessor->setZero();
-                _mode = Mode::Stop;
-                break;
-
-            case Mode::Stop:
-                _modulationProcessor->setVoltage(0, 0, _angleProcessor->getElectricalAngle());
-                break;
-
-            case Mode::VoltageControl:
-                _voltage_q = _target_voltage_q;
-                _voltage_d = _target_voltage_d;
-
-                if (_driver_enable) {
-                    _modulationProcessor->setVoltage(_voltage_q, _voltage_d, _angleProcessor->getElectricalAngle());
-                } else {
-                    _modulationProcessor->setVoltage(0, 0, _angleProcessor->getElectricalAngle());
-                }
-
-                break;
-
-            case Mode::CurrentControl: {
-                _voltage_q = _pid_current_q.update(_target_current_q, _observed_current_q);
-                _voltage_d = _pid_current_d.update(_target_current_d, _observed_current_d);
-
-                if (_driver_enable) {
-                    _modulationProcessor->setVoltage(_voltage_q, _voltage_d, _angleProcessor->getElectricalAngle());
-                } else {
-                    _modulationProcessor->setVoltage(0, 0, _angleProcessor->getElectricalAngle());
-                }
-
-            } break;
-
-            case Mode::VelocityControl: {
-                _target_current_q = _pid_velocity.update(_target_velocity, _observed_velocity);
-                _target_current_d = 0;
-
-                _voltage_q = _pid_current_q.update(_target_current_q, _observed_current_q);
-                _voltage_d = _pid_current_d.update(_target_current_d, _observed_current_d);
-
-                if (_driver_enable) {
-                    _modulationProcessor->setVoltage(_voltage_q, _voltage_d, _angleProcessor->getElectricalAngle());
-                } else {
-                    _modulationProcessor->setVoltage(0, 0, _angleProcessor->getElectricalAngle());
-                }
-            } break;
-
-            case Mode::Beep:
-                _beep_cnt_e++;
-                _beep_cnt_c++;
-                if (_beep_cnt_e > _beep_time) {
-                    _modulationProcessor->setVoltage(0, 0, _angleProcessor->getElectricalAngle());
-                    // _beep_cnt = 0;
-                    _mode = Mode::Stop;
-                } else {
-                    if (_beep_cnt_c > (50 / _beep_freq * 1000)) {
-                        _beep_cnt_c = 0;
-                    } else if (_beep_cnt_c > (50 / _beep_freq * 1000) * 0.5) {
-                        _voltage_q = _pid_current_q.update(_beep_current, _observed_current_q);
-                    } else {
-                        _voltage_q = _pid_current_q.update(0, _observed_current_q);
-                    }
-
-                    _voltage_d = _pid_current_d.update(0, _observed_current_d);
-
-                    if (_voltage_q > 4) {
-                        _voltage_q = 4;
-                    } else if (_voltage_q < -4) {
-                        _voltage_q = -4;
-                    }
-
-                    _modulationProcessor->setVoltage(_voltage_q, _voltage_d, _angleProcessor->getElectricalAngle());
-                }
-                break;
-
-            default:
-                break;
+        if (_last_hfi_voltage != _hfi_voltage || _last_Ts != _Ts || _last_Ld != _Ld || _last_Lq != _Lq) {
+            _predivAngleest = 1.0f / (_hfi_voltage * _Ts * (1.0f / _Lq - 1.0f / _Ld));
+            _last_hfi_voltage = _hfi_voltage;
+            _last_Ts = _Ts;
+            _last_Ld = _Ld;
+            _last_Lq = _Lq;
+            _Ts_div = 1 / _Ts;
         }
+
+        _hfi_curangleest = 0.5f * _currentProcessor->getDQCurrentDiff().q * _predivAngleest;
+        _hfi_error = -_hfi_curangleest;
+        _hfi_int += _hfi_error * _Ts * _hfi_gain2;
+        _hfi_int = _constrain(_hfi_int, -_Ts * 120.0f, _Ts * 120.0f);
+        _hfi_out += _hfi_gain1 * _Ts * _hfi_error + _hfi_int;
+
+        _voltage_q_bf = _pid_current_q.update(_target_current_q, _currentProcessor->getDQCurrent().q);
+        _voltage_d_bf = _pid_current_d.update(_target_current_d, _currentProcessor->getDQCurrent().d);
+
+        _voltage_q = LP_FILTER(_voltage_q, _voltage_q_bf, 0.8);
+        _voltage_d = LP_FILTER(_voltage_d, _voltage_d_bf, 0.8);
+
+        _modulationProcessor->setVoltage(_voltage_q, _voltage_d, _electrical_angle);
+
+        while (_hfi_out < 0) {
+            _hfi_out += 2 * M_PI;
+        }
+        while (_hfi_out >= 2 * M_PI) {
+            _hfi_out -= 2 * M_PI;
+        }
+        _hfi_int = _hfinormalizeAngle(_hfi_int);
+
+        float d_angle = _hfi_out - _electrical_angle;
+        if (abs(d_angle) > (0.8f * 2 * M_PI))
+            _hfi_full_turns += (d_angle > 0.0f) ? -1.0f : 1.0f;
+        _electrical_angle = _hfi_out;
 
         _modulationProcessor->update();
     }
@@ -238,6 +178,10 @@ class BldcController {
         _mode = Mode::Beep;
     }
 
+    float getElectricalAngle() {
+        return _electrical_angle;
+    }
+
    private:
     CurrentProcessor* _currentProcessor;
     AngleProcessor* _angleProcessor;
@@ -255,8 +199,43 @@ class BldcController {
     float _calib_e_angle = -M_PI * 3 / 2;
     unsigned int calib_cnt = 0;
 
+    float _electrical_angle = 0;
+
+    float _Ld = 0.00032;
+    float _Lq = 0.00048;
+
+    // float _Ld = 4.345e-6f;
+    // float _Lq = 5.475e-6f;
+
+    // float _hfi_gain1 = 100.0f * 2 * M_PI;
+    // float _hfi_gain2 = 1.0f * 2 * M_PI;
+
+    float _hfi_gain1 = 750.0f * 2 * M_PI;
+    float _hfi_gain2 = 5.0f * 2 * M_PI;
+
+    float _last_Ld = _Ld;
+    float _last_Lq = _Lq;
+
+    bool _injection_polarity = false;
+    float _Ts = 1.0f / (2.0f * 50000.0f);
+    float _last_Ts = _Ts;
+    float _Ts_div = 1 / _Ts;
+    float _hfi_voltage = 4;
+    float _last_hfi_voltage = 0;
+
+    float _predivAngleest = 1.0f / (_hfi_voltage * _Ts * (1.0f / _Lq - 1.0f / _Ld));
+
+    float _hfi_curangleest = 0;
+    float _hfi_error = 0;
+    float _hfi_int = 0;
+    float _hfi_out = 0;
+    float _hfi_full_turns = 0;
+
     float _voltage_q = 0;
     float _voltage_d = 0;
+
+    float _voltage_q_bf = 0;
+    float _voltage_d_bf = 0;
 
     float _target_voltage_q = 0;
     float _target_voltage_d = 0;
@@ -276,4 +255,14 @@ class BldcController {
     float _beep_freq = 0;
     float _beep_current = 0;
     float _beep_time = 0;
+
+    float _hfinormalizeAngle(float angle) {
+        while (angle < 0) {
+            angle += 2 * M_PI;
+        }
+        while (angle >= 2 * M_PI) {
+            angle -= 2 * M_PI;
+        }
+        return angle;
+    }
 };

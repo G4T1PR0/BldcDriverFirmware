@@ -28,6 +28,8 @@ class ModulationProcessor {
 
         //_mcu->cordicSinCos(_electric_angle, &sin, &cos);
 
+        _voltage_d += _injection_voltage * (_injection_polarity ? 1 : -1);
+
         if (_voltage_d > _voltage_limit) {
             _voltage_d = _voltage_limit;
         } else if (_voltage_d < -_voltage_limit) {
@@ -106,6 +108,14 @@ class ModulationProcessor {
         w = _w_pwm;
     }
 
+    void setInjectionVoltage(float voltage) {
+        _injection_voltage = voltage;
+    }
+
+    void setInjectionPolarity(bool polarity) {
+        _injection_polarity = polarity;
+    }
+
    private:
     baseMcuAbstractionLayer* _mcu;
     baseBLDCDriver* _driver;
@@ -114,11 +124,14 @@ class ModulationProcessor {
     float _voltage_d;
     float _electric_angle;
 
-    float _voltage_limit = 17;
+    float _voltage_limit = 12;
 
     float _u_pwm;
     float _v_pwm;
     float _w_pwm;
+
+    float _injection_voltage = 0;
+    bool _injection_polarity = false;
 
     const float _sqrt3_2 = sqrt(3) / 2;
 

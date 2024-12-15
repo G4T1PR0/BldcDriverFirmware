@@ -45,6 +45,15 @@ class CurrentProcessor {
 
         _alpha_beta_current = _clarkeTransform(_phase_current);
         _dq_current = _parkTransform(_alpha_beta_current, electricalAngle);
+
+        if (_injection_polarity) {
+            _dq_current_high = _dq_current;
+        } else {
+            _dq_current_low = _dq_current;
+        }
+
+        _dq_current_diff.d = _dq_current_high.d - _dq_current_low.d;
+        _dq_current_diff.q = _dq_current_high.q - _dq_current_low.q;
     }
 
     PhaseCurrent_s getPhaseCurrent() {
@@ -59,6 +68,22 @@ class CurrentProcessor {
         return _dq_current;
     }
 
+    void setInjectionPolarity(bool polarity) {
+        _injection_polarity = polarity;
+    }
+
+    DQCurrent_s getDQCurrentHigh() {
+        return _dq_current_high;
+    }
+
+    DQCurrent_s getDQCurrentLow() {
+        return _dq_current_low;
+    }
+
+    DQCurrent_s getDQCurrentDiff() {
+        return _dq_current_diff;
+    }
+
    private:
     baseMcuAbstractionLayer* _mcu;
     baseCurrentSensor* _currentSensor;
@@ -66,6 +91,11 @@ class CurrentProcessor {
     PhaseCurrent_s _phase_current;
     AlphaBetaCurrent_s _alpha_beta_current;
     DQCurrent_s _dq_current;
+    DQCurrent_s _dq_current_high;
+    DQCurrent_s _dq_current_low;
+    DQCurrent_s _dq_current_diff;
+
+    bool _injection_polarity = false;
 
     const float _1_sqrt3 = 1.0f / sqrt(3);
     const float _2_sqrt3 = 2.0f / sqrt(3);

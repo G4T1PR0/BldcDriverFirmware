@@ -78,14 +78,14 @@ void app_main() {
     bldcController.beep(2045, 0.5, 350);
     mcu.waitMs(500);
 
-    printf("\x1b[32m[Main Thread]\x1b[39m Calibration Start\n");
+    // printf("\x1b[32m[Main Thread]\x1b[39m Calibration Start\n");
 
-    bldcController.setMode(BldcController::Mode::Calibration1);
+    // bldcController.setMode(BldcController::Mode::Calibration1);
 
-    while (bldcController.getMode() != BldcController::Mode::Stop) {
-    }
+    // while (bldcController.getMode() != BldcController::Mode::Stop) {
+    // }
 
-    printf("\x1b[32m[Main Thread]\x1b[39m Calibration End\n");
+    // printf("\x1b[32m[Main Thread]\x1b[39m Calibration End\n");
 
     mcu.waitMs(300);
     bldcController.beep(2045, 0.5, 250);
@@ -99,7 +99,7 @@ void app_main() {
 
     bldcController.setEnable(true);
     bldcController.setMode(BldcController::Mode::CurrentControl);
-    bldcController.setTargetCurrent(0, 0.5);
+    bldcController.setTargetCurrent(0, 0);
 
     // bldcController.setEnable(true);
     // bldcController.setMode(BldcController::Mode::VoltageControl);
@@ -129,12 +129,12 @@ void app_main() {
 
             // printf("b_vr: %f ", mcu.adcGetValue(MAL::P_ADC::Bus_Voltage) * 3.3f / (1 << 16));
 
-            printf("mode: %d ", mode);
+            // printf("mode: %d ", mode);
 
             // printf("b_v: %f ", mcu.adcGetValue(MAL::P_ADC::Bus_Voltage) * 3.3f / (1 << 16) * 23.25 / 3.3);
 
             // printf("enc %ld ", encoder.getTotalCnt());
-            // // printf(">e_a: %f ", angleProcessor.getElectricalAngle());
+            printf(">e_a: %f ", bldcController.getElectricalAngle());
             // printf("m_a: %f ", angleProcessor.getMechanicalAngle());
             // // printf("v1 %f ", encoder.getVelocity());
             // printf("rad/s %.2f ", bldcController.getObservedVelocity());
@@ -153,13 +153,13 @@ void app_main() {
 
             // printf("t_qc: %.2f t_dc: %.2f ", t_qc, t_dc);
 
-            float vd;
-            float vq;
+            // float vd;
+            // float vq;
 
-            bldcController.getApplyVoltage(vq, vd);
+            // bldcController.getApplyVoltage(vq, vd);
 
-            printf("d_v: %.2f q_v: %.2f ", vd, vq);
-            printf("d_o_c: %.2f q_o_ct: %.2f ", currentProcessor.getDQCurrent().d, currentProcessor.getDQCurrent().q);
+            // printf("d_v: %.2f q_v: %.2f ", vd, vq);
+            // printf("d_o_c: %.2f q_o_ct: %.2f ", currentProcessor.getDQCurrentDiff().d, currentProcessor.getDQCurrentDiff().q);
 
             float u, v, w;
             modulationProcessor.getDuty(u, v, w);
