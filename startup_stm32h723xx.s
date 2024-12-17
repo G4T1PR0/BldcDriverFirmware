@@ -45,6 +45,14 @@ defined in linker script */
 .word  _ebss
 /* stack used for SystemInit_ExtMemCtl; always internal RAM used */
 
+.word _hal_sidata
+.word _hal_sdata
+.word _hal_edata
+
+.word _isr_sidata
+.word _isr_sdata
+.word _isr_edata
+
 /**
  * @brief  This is the code that gets called when the processor first
  *          starts execution following a reset event. Only the absolutely
@@ -79,6 +87,43 @@ LoopCopyDataInit:
   adds r4, r0, r3
   cmp r4, r1
   bcc CopyDataInit
+
+/* MY CHANGES BELOW */
+/* Copy the data segment initializers from flash to CCM SRAM */
+  ldr r0, =_hal_sdata
+  ldr r1, =_hal_edata
+  ldr r2, =_hal_sidata
+  movs r3, #0
+  b	CCMLoopCopyDataInit
+ 
+CCMCopyDataInit:
+  ldr r4, [r2, r3]
+  str r4, [r0, r3]
+  adds r3, r3, #4
+ 
+CCMLoopCopyDataInit:
+  adds r4, r0, r3
+  cmp r4, r1
+  bcc CCMCopyDataInit
+
+/* MY CHANGES BELOW */
+/* Copy the data segment initializers from flash to CCM SRAM */
+  ldr r0, =_isr_sdata
+  ldr r1, =_isr_edata
+  ldr r2, =_isr_sidata
+  movs r3, #0
+  b	ISRLoopCopyDataInit
+ 
+ISRCopyDataInit:
+  ldr r4, [r2, r3]
+  str r4, [r0, r3]
+  adds r3, r3, #4
+ 
+ISRLoopCopyDataInit:
+  adds r4, r0, r3
+  cmp r4, r1
+  bcc ISRCopyDataInit
+
 /* Zero fill the bss segment. */
   ldr r2, =_sbss
   ldr r4, =_ebss

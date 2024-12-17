@@ -73,12 +73,31 @@ FLASH (rx)      : ORIGIN = 0x8000000, LENGTH = 512K
 SECTIONS
 {
   /* The startup code goes first into FLASH */
+  _isr_sidata = LOADADDR(.isr_vector);
+
   .isr_vector :
   {
     . = ALIGN(4);
+    _isr_sdata = .;
     KEEP(*(.isr_vector)) /* Startup code */
     . = ALIGN(4);
+    _isr_edata = .;
   } >FLASH
+
+  _hal_sidata = LOADADDR(.generateCode);
+
+  .generateCode :
+  {
+    . = ALIGN(4);
+    _hal_sdata = .;
+    *stm32h7xx_hal_adc*.obj (.text .text*) 
+    *stm32h7xx_hal_tim*.obj (.text .text*) 
+    *stm32h7xx_hal_dma*.obj (.text .text*) 
+    *stm32h7xx_it.c* (.text .text*)
+    *Core/App*obj (.text .text*) 
+    . = ALIGN(4);
+    _hal_edata = .;
+  } >ITCMRAM AT> FLASH
 
   /* The program code and other data goes into FLASH */
   .text :
