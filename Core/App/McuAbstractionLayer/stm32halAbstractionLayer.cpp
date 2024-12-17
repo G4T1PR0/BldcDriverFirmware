@@ -428,6 +428,7 @@ void stm32halAbstractionLayer::_initTimerCounter() {
 void stm32halAbstractionLayer::timerSetCnt(P_TimerCnt p, uint32_t cnt) {
     if (p != P_TimerCnt::End_C) {
         __HAL_TIM_SET_COUNTER(PAL.Cnt_Timer[p], cnt);
+        _interrupt_cnt[p] = 0;
     }
 }
 
